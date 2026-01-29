@@ -30,7 +30,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
           <div className="flex items-center gap-4 md:gap-8 shrink-0">
             <a
-              href="#"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdilfVxnkGT4aB3kkgtQ71xUH5AsW8L8yKtitYjCwK92HxFag/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-text-secondary hover:text-cta flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] transition-all hidden sm:flex"
             >
               <AlertCircle size={18} /> FEEDBACK
