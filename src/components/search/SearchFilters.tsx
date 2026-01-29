@@ -34,8 +34,8 @@ export function SearchFilters({ shows, tags }: SearchFiltersProps) {
   };
 
   return (
-    <div className="space-y-4 p-6 bg-surface border border-border-subtle rounded-[2rem]">
-      <h3 className="font-black text-text-primary">篩選條件</h3>
+    <div className="space-y-5 p-6 bg-surface border border-border-subtle rounded-[2rem] sticky top-24">
+      <h3 className="font-black text-text-primary text-lg">篩選條件</h3>
 
       <div className="space-y-2">
         <Label htmlFor="show" className="text-text-secondary text-sm font-bold">節目系列</Label>

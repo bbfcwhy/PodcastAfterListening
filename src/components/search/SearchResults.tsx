@@ -25,12 +25,12 @@ export function SearchResults({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm text-muted-foreground">
+    <div className="space-y-6">
+      <div className="text-sm text-text-secondary font-bold">
         找到 {episodes.length} 個結果
         {query && `（關鍵字：${query}）`}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {episodes.map((episode) => {
           const show = showsMap.get(episode.show_id);
           return (
