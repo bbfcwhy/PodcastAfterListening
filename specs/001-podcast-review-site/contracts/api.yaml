@@ -1,0 +1,772 @@
+openapi: 3.1.0
+info:
+  title: Podcast 聽後回顧網站 API
+  version: 1.0.0
+  description: |
+    Podcast 聽後回顧網站的 REST API 規格。
+    本 API 主要透過 Next.js API Routes 實作，部分操作直接使用 Supabase Client。
+
+servers:
+  - url: /api
+    description: Next.js API Routes
+
+tags:
+  - name: Shows
+    description: 節目系列相關操作
+  - name: Episodes
+    description: 單集節目相關操作
+  - name: Comments
+    description: 留言相關操作
+  - name: Search
+    description: 搜尋功能
+  - name: Affiliate
+    description: 聯盟行銷相關操作
+  - name: Admin
+    description: 站長管理功能
+
+paths:
+  /shows:
+    get:
+      tags: [Shows]
+      summary: 取得節目系列列表
+      description: 取得所有節目系列，支援分頁
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowListResponse'
+
+  /shows/{slug}:
+    get:
+      tags: [Shows]
+      summary: 取得單一節目系列
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowDetailResponse'
+        '404':
+          description: 節目不存在
+
+  /shows/{slug}/episodes:
+    get:
+      tags: [Episodes]
+      summary: 取得節目系列下的所有單集
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeListResponse'
+
+  /episodes:
+    get:
+      tags: [Episodes]
+      summary: 取得最新單集列表
+      description: 取得所有節目的最新單集，用於首頁展示
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeListResponse'
+
+  /episodes/{showSlug}/{episodeSlug}:
+    get:
+      tags: [Episodes]
+      summary: 取得單集詳情
+      parameters:
+        - name: showSlug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: episodeSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodeDetailResponse'
+        '404':
+          description: 單集不存在
+
+  /episodes/{episodeId}/comments:
+    get:
+      tags: [Comments]
+      summary: 取得單集留言
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentListResponse'
+
+    post:
+      tags: [Comments]
+      summary: 新增留言
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: episodeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: 留言建立成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '401':
+          description: 未登入
+        '429':
+          description: 發言頻率過高
+
+  /search:
+    get:
+      tags: [Search]
+      summary: 全文搜尋
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 搜尋關鍵字
+        - name: show
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: 篩選特定節目系列
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          description: 篩選標籤
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 起始日期
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 結束日期
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /affiliate/redirect/{affiliateId}:
+    get:
+      tags: [Affiliate]
+      summary: 聯盟行銷重導向
+      description: 記錄點擊並重導向至目標 URL
+      parameters:
+        - name: affiliateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: episode
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: 來源單集 ID
+      responses:
+        '302':
+          description: 重導向至目標 URL
+
+  /admin/episodes:
+    get:
+      tags: [Admin]
+      summary: 取得所有單集（含未發布）
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminEpisodeListResponse'
+        '401':
+          description: 未登入
+        '403':
+          description: 權限不足
+
+    post:
+      tags: [Admin]
+      summary: 新增單集
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEpisodeRequest'
+      responses:
+        '201':
+          description: 建立成功
+        '401':
+          description: 未登入
+        '403':
+          description: 權限不足
+
+  /admin/episodes/{id}:
+    put:
+      tags: [Admin]
+      summary: 更新單集
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEpisodeRequest'
+      responses:
+        '200':
+          description: 更新成功
+        '401':
+          description: 未登入
+        '403':
+          description: 權限不足
+        '404':
+          description: 單集不存在
+
+    delete:
+      tags: [Admin]
+      summary: 刪除單集
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 刪除成功
+        '401':
+          description: 未登入
+        '403':
+          description: 權限不足
+
+  /admin/comments:
+    get:
+      tags: [Admin]
+      summary: 取得待審留言
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, hidden, spam]
+            default: pending
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCommentListResponse'
+
+  /admin/comments/{id}:
+    patch:
+      tags: [Admin]
+      summary: 更新留言狀態
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [approved, hidden, spam]
+              required:
+                - status
+      responses:
+        '200':
+          description: 更新成功
+        '401':
+          description: 未登入
+        '403':
+          description: 權限不足
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT Token
+
+  schemas:
+    Show:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        cover_image_url:
+          type: string
+        original_url:
+          type: string
+        hosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Host'
+        episode_count:
+          type: integer
+
+    Host:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        bio:
+          type: string
+        avatar_url:
+          type: string
+
+    Episode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        show:
+          $ref: '#/components/schemas/ShowSummary'
+        title:
+          type: string
+        slug:
+          type: string
+        published_at:
+          type: string
+          format: date
+        original_url:
+          type: string
+        ai_summary:
+          type: string
+        ai_sponsorship:
+          type: string
+        host_notes:
+          type: string
+        duration_seconds:
+          type: integer
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        comment_count:
+          type: integer
+
+    ShowSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        cover_image_url:
+          type: string
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, hidden, spam]
+        created_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserSummary'
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        avatar_url:
+          type: string
+
+    AffiliateContent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+        redirect_url:
+          type: string
+          description: 包含追蹤參數的重導向 URL
+
+    # Request/Response schemas
+    ShowListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Show'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ShowDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Show'
+
+    EpisodeListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Episode'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    EpisodeDetailResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Episode'
+            - type: object
+              properties:
+                affiliates:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AffiliateContent'
+
+    CommentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    SearchResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Episode'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        filters:
+          type: object
+          properties:
+            shows:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShowSummary'
+            tags:
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+
+    CreateCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+        - content
+
+    CreateEpisodeRequest:
+      type: object
+      properties:
+        show_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        published_at:
+          type: string
+          format: date
+        original_url:
+          type: string
+        ai_summary:
+          type: string
+        ai_sponsorship:
+          type: string
+        host_notes:
+          type: string
+        duration_seconds:
+          type: integer
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        is_published:
+          type: boolean
+          default: false
+      required:
+        - show_id
+        - title
+        - slug
+        - original_url
+
+    UpdateEpisodeRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        published_at:
+          type: string
+          format: date
+        original_url:
+          type: string
+        ai_summary:
+          type: string
+        ai_sponsorship:
+          type: string
+        host_notes:
+          type: string
+        duration_seconds:
+          type: integer
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        is_published:
+          type: boolean
+
+    AdminEpisodeListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Episode'
+              - type: object
+                properties:
+                  is_published:
+                    type: boolean
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AdminCommentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Comment'
+              - type: object
+                properties:
+                  episode:
+                    $ref: '#/components/schemas/EpisodeSummary'
+                  spam_score:
+                    type: number
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    EpisodeSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        show_slug:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
