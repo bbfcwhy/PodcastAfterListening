@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -23,17 +21,18 @@ export function SearchBar({ initialQuery = "", className }: SearchBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`flex gap-2 ${className}`}>
-      <Input
+    <form onSubmit={handleSubmit} className={`relative w-full ${className}`}>
+      <Search
+        className="absolute left-5 top-1/2 -translate-y-1/2 text-text-secondary"
+        size={18}
+      />
+      <input
         type="search"
-        placeholder="搜尋節目..."
+        placeholder="搜尋感興趣的內容..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="flex-1"
+        className="w-full bg-surface border border-border-subtle rounded-[1.2rem] py-4 pl-14 pr-6 focus:ring-2 focus:ring-cta/20 outline-none text-sm transition-all shadow-sm placeholder:text-text-secondary text-text-primary"
       />
-      <Button type="submit">
-        <Search className="h-4 w-4" />
-      </Button>
     </form>
   );
 }

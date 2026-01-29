@@ -10,9 +10,16 @@ test.describe("Basic Navigation", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check for main layout elements - use link selector to avoid matching footer text
-    await expect(page.locator("a:has-text('Podcast 聽後回顧')")).toBeVisible({ timeout: 10000 });
-    
+    // Check for main layout elements - sidebar logo (lg+) OR mobile header (sm)
+    // On desktop the mobile header is hidden, on mobile the sidebar is hidden
+    const sidebarLogo = page.locator("aside a:has-text('PODCAST')");
+    const mobileHeader = page.locator("a:has-text('Podcast 聽後回顧')");
+
+    // At least one should be visible depending on viewport
+    const sidebarVisible = await sidebarLogo.isVisible({ timeout: 5000 }).catch(() => false);
+    const mobileVisible = await mobileHeader.isVisible({ timeout: 5000 }).catch(() => false);
+    expect(sidebarVisible || mobileVisible).toBe(true);
+
     // Check for AI disclaimer (partial text match) - wait for it to be rendered
     // The disclaimer might be in an Alert component, so we check for the text anywhere on the page
     const disclaimer = page.locator("text=/以下內容由 AI 自動解析產生/");
@@ -24,9 +31,20 @@ test.describe("Basic Navigation", () => {
     await page.waitForLoadState("networkidle");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check for search bar - try multiple selectors
-    const searchInput = page.locator("input[type='search']").or(page.locator("input[placeholder*='搜尋']")).first();
-    await expect(searchInput).toBeVisible({ timeout: 10000 });
+    // Check for search bar - there are two (desktop/mobile responsive), check at least one is visible
+    const searchInputs = page.locator("input[type='search'], input[placeholder*='搜尋']");
+    const count = await searchInputs.count();
+    expect(count).toBeGreaterThan(0);
+
+    // At least one search input should be visible depending on viewport
+    let foundVisible = false;
+    for (let i = 0; i < count; i++) {
+      if (await searchInputs.nth(i).isVisible({ timeout: 1000 }).catch(() => false)) {
+        foundVisible = true;
+        break;
+      }
+    }
+    expect(foundVisible).toBe(true);
   });
 
   test("should navigate to search page", async ({ page }) => {

@@ -1,10 +1,11 @@
+@import "tailwindcss";
+
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:is(.dark *));
+@source "../components/**/*.{js,ts,jsx,tsx}";
+@source "../app/**/*.{js,ts,jsx,tsx}";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -45,75 +46,91 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* ui_reference design tokens (DESIGN_TOKENS.md) */
+  --color-canvas: #E4CBAC;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: rgba(228, 203, 172, 0.35);
+  --color-text-primary: #664129;
+  --color-text-secondary: #B0967B;
+  --color-text-muted: rgba(102, 65, 41, 0.55);
+  --color-border-subtle: rgba(138, 158, 158, 0.35);
+  --color-border-strong: rgba(102, 65, 41, 0.25);
+  --color-cta: #DAA551;
+  --color-info: #8A9E9E;
+  --color-warn: #E6863A;
+  --color-hover: rgba(138, 158, 158, 0.12);
+  --color-selected: rgba(218, 165, 81, 0.18);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Map shadcn vars to ui_reference tokens so existing components get reference look */
+  --background: #E4CBAC;
+  --foreground: #664129;
+  --card: #FFFFFF;
+  --card-foreground: #664129;
+  --popover: #FFFFFF;
+  --popover-foreground: #664129;
+  --primary: #DAA551;
+  --primary-foreground: #664129;
+  --secondary: rgba(228, 203, 172, 0.35);
+  --secondary-foreground: #664129;
+  --muted: rgba(228, 203, 172, 0.35);
+  --muted-foreground: #B0967B;
+  --accent: rgba(138, 158, 158, 0.12);
+  --accent-foreground: #664129;
+  --destructive: #E6863A;
+  --border: rgba(138, 158, 158, 0.35);
+  --input: rgba(138, 158, 158, 0.35);
+  --ring: #DAA551;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #664129;
+  --sidebar-primary: #DAA551;
+  --sidebar-primary-foreground: #664129;
+  --sidebar-accent: rgba(138, 158, 158, 0.12);
+  --sidebar-accent-foreground: #664129;
+  --sidebar-border: rgba(138, 158, 158, 0.35);
+  --sidebar-ring: #DAA551;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  /* Dark mode: keep reference-inspired contrast */
+  --background: #2a2520;
+  --foreground: #E4CBAC;
+  --card: #3d3530;
+  --card-foreground: #E4CBAC;
+  --popover: #3d3530;
+  --popover-foreground: #E4CBAC;
+  --primary: #DAA551;
+  --primary-foreground: #664129;
+  --secondary: rgba(138, 158, 158, 0.2);
+  --secondary-foreground: #E4CBAC;
+  --muted: rgba(138, 158, 158, 0.15);
+  --muted-foreground: #B0967B;
+  --accent: rgba(218, 165, 81, 0.2);
+  --accent-foreground: #E4CBAC;
+  --destructive: #E6863A;
+  --border: rgba(138, 158, 158, 0.25);
+  --input: rgba(138, 158, 158, 0.25);
+  --ring: #DAA551;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #3d3530;
+  --sidebar-foreground: #E4CBAC;
+  --sidebar-primary: #DAA551;
+  --sidebar-primary-foreground: #664129;
+  --sidebar-accent: rgba(218, 165, 81, 0.18);
+  --sidebar-accent-foreground: #E4CBAC;
+  --sidebar-border: rgba(138, 158, 158, 0.25);
+  --sidebar-ring: #DAA551;
 }
 
 @layer base {
@@ -121,6 +138,38 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-canvas text-text-primary;
+    font-family: "Noto Sans TC", sans-serif;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
   }
+  /* 連結與參考一致：深棕主色、hover 金色，不用預設藍 */
+  a {
+    @apply text-text-primary;
+  }
+  a:hover {
+    @apply text-cta;
+  }
+}
+
+@layer components {
+  .glass-header {
+    @apply border-b border-border-subtle bg-canvas/80;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .rounded-card {
+    @apply rounded-[2.5rem];
+  }
+}
+
+/* Scrollbar (reference style) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-canvas;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-info rounded-[10px];
 }

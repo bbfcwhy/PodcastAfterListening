@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 import { SearchBar } from "@/components/search/SearchBar";
+import { AlertCircle, Sparkles, Podcast } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -8,34 +10,67 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link href="/" className="text-2xl font-bold">
+    <div className="min-h-screen bg-canvas text-text-primary">
+      <Sidebar />
+
+      <main className="lg:ml-72 min-h-screen flex flex-col">
+        <header className="sticky top-0 z-50 glass-header px-4 md:px-10 py-4 md:py-6 flex justify-between items-center gap-4">
+          <div className="lg:hidden flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center shadow-sm">
+              <Podcast className="text-text-primary" size={20} />
+            </div>
+            <Link href="/" className="font-black tracking-tighter text-text-primary text-lg">
               Podcast 聽後回顧
             </Link>
-            <div className="flex-1 w-full md:max-w-md">
-              <SearchBar />
+          </div>
+
+          <div className="relative max-w-md w-full hidden md:block">
+            <SearchBar />
+          </div>
+
+          <div className="flex items-center gap-4 md:gap-8 shrink-0">
+            <a
+              href="#"
+              className="text-text-secondary hover:text-cta flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] transition-all hidden sm:flex"
+            >
+              <AlertCircle size={18} /> FEEDBACK
+            </a>
+            <div className="h-6 w-px bg-border-subtle hidden sm:block" />
+            <div className="w-12 h-12 rounded-2xl bg-cta border-4 border-surface shadow-sm flex items-center justify-center shrink-0">
+              <Sparkles className="text-text-primary" size={20} />
             </div>
-            <div className="flex gap-4">
-              <Link href="/search" className="hover:underline text-sm md:text-base">
-                進階搜尋
-              </Link>
+          </div>
+        </header>
+
+        <div className="md:hidden px-4 py-2">
+          <SearchBar />
+        </div>
+
+        <div className="px-4 md:px-10 py-3">
+          <AIDisclaimer />
+        </div>
+
+        <div className="flex-1">{children}</div>
+
+        <footer className="mt-24 md:mt-32 border-t border-border-subtle/10 py-16 md:py-20 px-4 md:px-10 bg-cta/5">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="flex justify-center gap-4 items-center text-text-secondary">
+              <Podcast size={32} />
+              <span className="font-black tracking-tighter uppercase text-text-primary text-xl md:text-2xl">
+                Podcast 聽後回顧
+              </span>
             </div>
-          </nav>
-        </div>
-      </header>
-
-      <AIDisclaimer />
-
-      <main className="flex-1 container mx-auto px-4 py-8">{children}</main>
-
-      <footer className="border-t mt-auto">
-        <div className="container mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 Podcast 聽後回顧網站。所有內容僅供參考。</p>
-        </div>
-      </footer>
+            <p className="text-xs md:text-sm text-text-secondary leading-relaxed max-w-2xl mx-auto font-bold">
+              本站內容由個人開發者利用 AI 技術深度彙整。實際內容請以播客原平台為準。
+            </p>
+            <div className="flex justify-center gap-8 text-[10px] font-black text-text-primary uppercase tracking-[0.3em]">
+              <a href="#" className="hover:text-cta transition-colors">隱私</a>
+              <a href="#" className="hover:text-cta transition-colors">條款</a>
+              <a href="#" className="hover:text-cta transition-colors">聯絡</a>
+            </div>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }

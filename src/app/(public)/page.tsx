@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { HomeHero } from "@/components/home/HomeHero";
 import { ShowGrid } from "@/components/shows/ShowGrid";
 import { EpisodeList } from "@/components/episodes/EpisodeList";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getShows } from "@/lib/services/shows";
 import { getLatestEpisodes } from "@/lib/services/episodes";
+import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,28 +27,48 @@ export default async function HomePage() {
     getLatestEpisodes(12),
   ]);
 
-  // Get shows for episodes to display show names
-  const showMap = new Map(shows.map((show) => [show.id, show]));
-  const episodesWithShows = episodes.map((episode) => ({
-    episode,
-    show: showMap.get(episode.show_id),
-  }));
-
   const hasContent = shows.length > 0 || episodes.length > 0;
 
   return (
     <MainLayout>
+      <HomeHero />
+
       {!hasContent ? (
-        <EmptyState
-          title="尚無內容"
-          description="目前還沒有任何節目或單集，請稍後再來。"
-        />
+        <div className="max-w-7xl mx-auto px-4 md:px-10 pb-24">
+          <EmptyState
+            title="尚無內容"
+            description="目前還沒有任何節目或單集，請稍後再來。"
+          />
+        </div>
       ) : (
-        <div className="space-y-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-10 pb-24 space-y-24 md:space-y-32">
           {episodes.length > 0 && (
-            <EpisodeList episodes={episodes} shows={shows} />
+            <section className="mb-24 md:mb-32" id="最新單集">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12 md:mb-16">
+                <div>
+                  <h3 className="text-3xl md:text-4xl font-black text-text-primary mb-2 md:mb-4">
+                    最新百科收錄
+                  </h3>
+                  <p className="text-text-secondary font-bold">
+                    每日自動彙整熱門集數，不漏掉任何細節。
+                  </p>
+                </div>
+                <Link
+                  href="/search"
+                  className="text-[10px] font-black text-cta uppercase tracking-[0.3em] hover:translate-x-2 transition-all flex items-center gap-2 shrink-0"
+                >
+                  查看全部 <ChevronRight size={14} />
+                </Link>
+              </div>
+              <EpisodeList episodes={episodes} shows={shows} hideSectionTitle />
+            </section>
           )}
-          {shows.length > 0 && <ShowGrid shows={shows} />}
+
+          {shows.length > 0 && (
+            <section id="節目系列">
+              <ShowGrid shows={shows} />
+            </section>
+          )}
         </div>
       )}
     </MainLayout>

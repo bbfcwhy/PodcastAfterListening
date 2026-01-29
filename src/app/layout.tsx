@@ -17,8 +17,9 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="zh-TW">
-      <body>
+    <html lang="zh-TW" suppressHydrationWarning>
+      {/* suppressHydrationWarning: 瀏覽器擴充可能在 React 載入前改動 html/body 屬性，導致 hydration 不一致 */}
+      <body suppressHydrationWarning>
         <AuthProvider initialUser={user}>
           {children}
           <Toaster />

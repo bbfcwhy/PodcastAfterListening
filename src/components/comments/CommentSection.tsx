@@ -42,7 +42,7 @@ export function CommentSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>討論區 ({comments.length})</CardTitle>
+        <CardTitle>討論區 ({comments?.length ?? 0})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <CommentForm episodeId={episodeId} onCommentAdded={refreshComments} />

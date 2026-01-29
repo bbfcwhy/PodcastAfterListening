@@ -9,12 +9,15 @@ interface EpisodeListProps {
   episodes: Episode[];
   shows?: Show[];
   itemsPerPage?: number;
+  /** 隱藏區塊標題（由外層提供，如首頁「最新百科收錄」） */
+  hideSectionTitle?: boolean;
 }
 
 export function EpisodeList({
   episodes,
   shows = [],
   itemsPerPage = 10,
+  hideSectionTitle = false,
 }: EpisodeListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(episodes.length / itemsPerPage);
@@ -31,8 +34,10 @@ export function EpisodeList({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">最新單集</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {!hideSectionTitle && (
+        <h2 className="text-2xl font-bold mb-6 text-text-primary">最新單集</h2>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
         {currentEpisodes.map((episode) => {
           const show = showMap.get(episode.show_id);
           return (
