@@ -13,7 +13,7 @@ test.describe("Basic Navigation", () => {
     // Check for main layout elements - sidebar logo (lg+) OR mobile header (sm)
     // On desktop the mobile header is hidden, on mobile the sidebar is hidden
     const sidebarLogo = page.locator("aside a:has-text('PODCAST')");
-    const mobileHeader = page.locator("a:has-text('Podcast 聽後回顧')");
+    const mobileHeader = page.locator("a:has-text('Podcast 聽了以後')");
 
     // At least one should be visible depending on viewport
     const sidebarVisible = await sidebarLogo.isVisible({ timeout: 5000 }).catch(() => false);

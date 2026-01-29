@@ -25,7 +25,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${show.name} - Podcast 聽後回顧`,
+    title: `${show.name} - Podcast 聽了以後`,
     description: show.description || undefined,
     openGraph: {
       title: show.name,

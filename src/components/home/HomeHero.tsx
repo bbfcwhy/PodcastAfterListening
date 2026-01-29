@@ -10,21 +10,16 @@ export function HomeHero() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-cta/10 rounded-full mb-8">
             <Sparkles className="text-cta" size={16} />
             <span className="text-[10px] font-black text-cta uppercase tracking-[0.3em]">
-              AI-Driven Podcast Wiki
+              Podcast After Listening
             </span>
           </div>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 md:mb-10 tracking-tighter leading-[1.1] text-text-primary">
-            快速找回
-            <br />
-            <span className="text-cta relative inline-block">
-              聽過的播客記憶
-              <span className="absolute bottom-2 left-0 w-full h-3 bg-cta/20 -z-10" />
-            </span>
+            Podcast 聽了以後
           </h2>
           <p className="text-text-secondary text-lg md:text-xl font-bold leading-relaxed mb-10 md:mb-12 max-w-xl mx-auto lg:mx-0">
-            忘記哪集講過什麼？想找業配優惠碼？
+            記下那些改變我的，
             <br />
-            迷因出處在哪？這裡都能快速找到。
+            也找回那些你聽過的。
           </p>
           <div className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-6">
             <Link

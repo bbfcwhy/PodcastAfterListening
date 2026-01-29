@@ -15,10 +15,10 @@ export function Sidebar() {
         </div>
         <div>
           <h1 className="text-xl font-black tracking-tighter leading-none text-text-primary">
-            PODCAST<span className="text-cta">聽後回顧</span>
+            PODCAST<span className="text-cta">聽了以後</span>
           </h1>
           <span className="text-[10px] font-bold text-cta/80 tracking-widest uppercase">
-            Content Wiki
+            After Listening
           </span>
         </div>
       </Link>

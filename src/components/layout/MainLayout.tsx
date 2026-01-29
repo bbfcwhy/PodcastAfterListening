@@ -20,7 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               <Podcast className="text-text-primary" size={20} />
             </div>
             <Link href="/" className="font-black tracking-tighter text-text-primary text-lg">
-              Podcast 聽後回顧
+              Podcast 聽了以後
             </Link>
           </div>
 
@@ -57,11 +57,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             <div className="flex justify-center gap-4 items-center text-text-secondary">
               <Podcast size={32} />
               <span className="font-black tracking-tighter uppercase text-text-primary text-xl md:text-2xl">
-                Podcast 聽後回顧
+                Podcast 聽了以後
               </span>
             </div>
             <p className="text-xs md:text-sm text-text-secondary leading-relaxed max-w-2xl mx-auto font-bold">
-              本站內容由個人開發者利用 AI 技術深度彙整。實際內容請以播客原平台為準。
+              我的 Podcast 筆記網站，也是給大家回顧聽過的 Podcast 內容的地方。內容由 AI 協助彙整，實際內容請以原節目為準。
             </p>
             <div className="flex justify-center gap-8 text-[10px] font-black text-text-primary uppercase tracking-[0.3em]">
               <a href="#" className="hover:text-cta transition-colors">隱私</a>

@@ -10,11 +10,11 @@ import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Podcast 聽後回顧網站",
-  description: "分享 Podcast 節目的個人心得與 AI 解析內容",
+  title: "Podcast After Listening | Podcast 聽了以後",
+  description: "記下那些改變我的，也找回那些你聽過的 - 個人 Podcast 筆記與回顧網站",
   openGraph: {
-    title: "Podcast 聽後回顧網站",
-    description: "分享 Podcast 節目的個人心得與 AI 解析內容",
+    title: "Podcast After Listening | Podcast 聽了以後",
+    description: "記下那些改變我的，也找回那些你聽過的 - 個人 Podcast 筆記與回顧網站",
     type: "website",
   },
 };
