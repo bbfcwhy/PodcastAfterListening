@@ -22,25 +22,25 @@ export default function AdminLayout({
           <div className="space-y-2">
             <h2 className="text-lg font-bold mb-4">後台管理</h2>
             <nav className="space-y-1">
-              <Link href="/admin/dashboard">
+              <Link href="/dashboard">
                 <Button variant="ghost" className="w-full justify-start">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   儀表板
                 </Button>
               </Link>
-              <Link href="/admin/episodes">
+              <Link href="/episodes">
                 <Button variant="ghost" className="w-full justify-start">
                   <FileText className="mr-2 h-4 w-4" />
-                  節目管理
+                  單集管理
                 </Button>
               </Link>
-              <Link href="/admin/comments">
+              <Link href="/comments">
                 <Button variant="ghost" className="w-full justify-start">
                   <MessageSquare className="mr-2 h-4 w-4" />
                   留言審核
                 </Button>
               </Link>
-              <Link href="/admin/affiliates">
+              <Link href="/affiliates">
                 <Button variant="ghost" className="w-full justify-start">
                   <FileText className="mr-2 h-4 w-4" />
                   聯盟行銷

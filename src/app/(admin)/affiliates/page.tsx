@@ -1,4 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAffiliates } from "@/lib/services/admin/affiliates";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -12,12 +14,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-export default async function AdminAffiliatesPage() {
-  const supabase = await createClient();
-  const { data: affiliates } = await supabase
-    .from("affiliate_contents")
-    .select("*")
-    .order("created_at", { ascending: false });
+export default async function AdminAffiliatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+  const pageSize = DEFAULT_PAGE_SIZE;
+  const { items: affiliates, total } = await getAffiliates({ page, pageSize });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="space-y-6">
@@ -29,7 +35,7 @@ export default async function AdminAffiliatesPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/admin/affiliates/new">
+          <Link href="/affiliates/new">
             <Plus className="mr-2 h-4 w-4" />
             新增內容
           </Link>
@@ -71,7 +77,7 @@ export default async function AdminAffiliatesPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/admin/affiliates/${affiliate.id}/edit`}>
+                    <Link href={`/affiliates/${affiliate.id}/edit`}>
                       編輯
                     </Link>
                   </Button>
@@ -87,6 +93,11 @@ export default async function AdminAffiliatesPage() {
           )}
         </TableBody>
       </Table>
+      <AdminPagination
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={{}}
+      />
     </div>
   );
 }

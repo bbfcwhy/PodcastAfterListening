@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -13,8 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { Episode, Show } from "@/types/database";
 import { Edit, Trash2, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface EpisodeTableProps {
   episodes: (Episode & { show?: Show })[];
@@ -22,6 +25,40 @@ interface EpisodeTableProps {
 }
 
 export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
+  const router = useRouter();
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const handleTogglePublished = async (episode: Episode & { show?: Show }) => {
+    setTogglingId(episode.id);
+    try {
+      const res = await fetch(`/api/admin/episodes/${episode.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          is_published: !episode.is_published,
+          updated_at: episode.updated_at,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        toast.warning("此筆內容已有更新版本，請重新整理後再切換");
+        router.refresh();
+        return;
+      }
+      if (!res.ok) {
+        toast.error(data.error || "切換失敗");
+        return;
+      }
+      toast.success(episode.is_published ? "已改為下架" : "已改為上架");
+      router.refresh();
+    } catch (error) {
+      console.error("Error toggling published:", error);
+      toast.error("切換失敗");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除這個節目嗎？此操作無法復原。")) {
       try {
@@ -73,9 +110,25 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
                   : "-"}
               </TableCell>
               <TableCell>
-                <Badge variant={episode.is_published ? "default" : "secondary"}>
-                  {episode.is_published ? "已發布" : "草稿"}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={episode.is_published ? "default" : "secondary"}>
+                    {episode.is_published ? "已發布" : "草稿"}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={togglingId === episode.id}
+                    onClick={() => handleTogglePublished(episode)}
+                    title={episode.is_published ? "改為下架" : "改為上架"}
+                    aria-label={episode.is_published ? "改為下架" : "改為上架"}
+                  >
+                    {togglingId === episode.id
+                      ? "…"
+                      : episode.is_published
+                        ? "下架"
+                        : "上架"}
+                  </Button>
+                </div>
               </TableCell>
               <TableCell>
                 {format(new Date(episode.created_at), "yyyy-MM-dd HH:mm", {
@@ -85,7 +138,7 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/admin/episodes/edit/${episode.id}`}>
+                    <Link href={`/episodes/edit/${episode.id}`}>
                       <Edit className="h-4 w-4" />
                     </Link>
                   </Button>
