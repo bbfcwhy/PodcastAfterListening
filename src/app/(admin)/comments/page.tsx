@@ -27,18 +27,18 @@ export default async function AdminCommentsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">留言審核</h1>
-        <p className="text-muted-foreground mt-2">管理與審核訪客留言</p>
+        <h1 className="text-3xl font-bold text-text-primary">留言審核</h1>
+        <p className="text-text-secondary mt-2">管理與審核訪客留言</p>
       </div>
 
       <div className="space-y-4">
-        <div className="flex gap-2 border-b">
+        <div className="flex gap-2 border-b border-border-subtle">
           <Link
             href="/comments?status=pending"
             className={`px-4 py-2 border-b-2 ${
               status === "pending"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-cta text-cta"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             待審核
@@ -47,8 +47,8 @@ export default async function AdminCommentsPage({
             href="/comments?status=approved"
             className={`px-4 py-2 border-b-2 ${
               status === "approved"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-cta text-cta"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             已批准
@@ -57,8 +57,8 @@ export default async function AdminCommentsPage({
             href="/comments?status=hidden"
             className={`px-4 py-2 border-b-2 ${
               status === "hidden"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-cta text-cta"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             已隱藏
@@ -67,8 +67,8 @@ export default async function AdminCommentsPage({
             href="/comments?status=spam"
             className={`px-4 py-2 border-b-2 ${
               status === "spam"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-cta text-cta"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             垃圾
@@ -77,8 +77,8 @@ export default async function AdminCommentsPage({
             href="/comments?status=all"
             className={`px-4 py-2 border-b-2 ${
               status === "all"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-cta text-cta"
+                : "border-transparent text-text-secondary hover:text-text-primary"
             }`}
           >
             全部

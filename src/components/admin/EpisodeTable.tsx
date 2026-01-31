@@ -79,27 +79,27 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
   };
 
   return (
-    <Table>
+    <Table className="bg-surface">
       <TableHeader>
-        <TableRow>
-          <TableHead>標題</TableHead>
-          <TableHead>節目</TableHead>
-          <TableHead>發布日期</TableHead>
-          <TableHead>狀態</TableHead>
-          <TableHead>建立時間</TableHead>
-          <TableHead className="text-right">操作</TableHead>
+        <TableRow className="border-border-subtle">
+          <TableHead className="text-text-primary">標題</TableHead>
+          <TableHead className="text-text-primary">節目</TableHead>
+          <TableHead className="text-text-primary">發布日期</TableHead>
+          <TableHead className="text-text-primary">狀態</TableHead>
+          <TableHead className="text-text-primary">建立時間</TableHead>
+          <TableHead className="text-right text-text-primary">操作</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {episodes.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center text-muted-foreground">
+          <TableRow className="border-border-subtle">
+            <TableCell colSpan={6} className="text-center text-text-secondary">
               尚無節目
             </TableCell>
           </TableRow>
         ) : (
           episodes.map((episode) => (
-            <TableRow key={episode.id}>
+            <TableRow key={episode.id} className="border-border-subtle hover:bg-hover">
               <TableCell className="font-medium">{episode.title}</TableCell>
               <TableCell>{episode.show?.name || "未知"}</TableCell>
               <TableCell>

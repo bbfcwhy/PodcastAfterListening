@@ -35,26 +35,26 @@ export function CommentModerationTable({
   };
 
   return (
-    <Table>
+    <Table className="bg-surface">
       <TableHeader>
-        <TableRow>
-          <TableHead>內容</TableHead>
-          <TableHead>狀態</TableHead>
-          <TableHead>垃圾分數</TableHead>
-          <TableHead>建立時間</TableHead>
-          <TableHead className="text-right">操作</TableHead>
+        <TableRow className="border-border-subtle">
+          <TableHead className="text-text-primary">內容</TableHead>
+          <TableHead className="text-text-primary">狀態</TableHead>
+          <TableHead className="text-text-primary">垃圾分數</TableHead>
+          <TableHead className="text-text-primary">建立時間</TableHead>
+          <TableHead className="text-right text-text-primary">操作</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {comments.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={5} className="text-center text-muted-foreground">
+          <TableRow className="border-border-subtle">
+            <TableCell colSpan={5} className="text-center text-text-secondary">
               尚無留言
             </TableCell>
           </TableRow>
         ) : (
           comments.map((comment) => (
-            <TableRow key={comment.id}>
+            <TableRow key={comment.id} className="border-border-subtle hover:bg-hover">
               <TableCell className="max-w-md">
                 <p className="truncate">{comment.content}</p>
               </TableCell>

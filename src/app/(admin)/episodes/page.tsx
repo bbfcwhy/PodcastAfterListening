@@ -49,12 +49,12 @@ export default async function AdminEpisodesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">單集管理</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold text-text-primary">單集管理</h1>
+          <p className="text-text-secondary mt-2">
             管理所有 Podcast 單集
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-cta text-text-primary hover:bg-cta/90">
           <Link href="/episodes/new">
             <Plus className="mr-2 h-4 w-4" />
             新增單集
@@ -69,7 +69,7 @@ export default async function AdminEpisodesPage({
       >
         <input type="hidden" name="page" value="1" />
         <div className="space-y-1">
-          <label htmlFor="ep-title" className="text-sm text-muted-foreground">
+          <label htmlFor="ep-title" className="text-sm text-text-secondary">
             標題搜尋
           </label>
           <Input
@@ -82,14 +82,14 @@ export default async function AdminEpisodesPage({
           />
         </div>
         <div className="space-y-1">
-          <label htmlFor="ep-published" className="text-sm text-muted-foreground">
+          <label htmlFor="ep-published" className="text-sm text-text-secondary">
             上架狀態
           </label>
           <select
             id="ep-published"
             name="is_published"
             defaultValue={params.is_published ?? ""}
-            className="flex h-9 w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-36 rounded-md border border-border-subtle bg-surface px-3 py-1 text-sm text-text-primary shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cta"
           >
             <option value="">全部</option>
             <option value="true">已上架</option>
