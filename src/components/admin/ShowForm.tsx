@@ -9,8 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Show } from "@/types/database";
 import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
 
 type FieldError = Record<string, string>;
+
+// 欄位長度限制
+const MAX_NAME_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 2000;
 
 interface ShowFormProps {
   show?: Show;
@@ -23,6 +28,7 @@ export function ShowForm({ show }: ShowFormProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
   const [conflict, setConflict] = useState<{ current_updated_at: string } | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [networkError, setNetworkError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: show?.name ?? "",
     slug: show?.slug ?? "",
@@ -43,11 +49,24 @@ export function ShowForm({ show }: ShowFormProps) {
 
   const markDirty = useCallback(() => setDirty(true), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setIsSubmitting(true);
     setFieldErrors({});
     setConflict(null);
+    setNetworkError(null);
+
+    // 前端欄位長度驗證
+    if (formData.name.length > MAX_NAME_LENGTH) {
+      setFieldErrors({ name: `名稱不可超過 ${MAX_NAME_LENGTH} 字元` });
+      setIsSubmitting(false);
+      return;
+    }
+    if (formData.description.length > MAX_DESCRIPTION_LENGTH) {
+      setFieldErrors({ description: `描述不可超過 ${MAX_DESCRIPTION_LENGTH} 字元` });
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const url = show ? `/api/admin/shows/${show.id}` : "/api/admin/shows";
@@ -97,11 +116,19 @@ export function ShowForm({ show }: ShowFormProps) {
       setIsSubmitting(false);
     } catch (error) {
       console.error("Error saving show:", error);
-      toast.error(
-        error instanceof Error ? error.message : "操作失敗，請稍後再試"
-      );
+      // 判斷錯誤類型，提供友善提示
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        setNetworkError("網路連線錯誤，請檢查網路後重試");
+      } else {
+        setNetworkError("伺服器錯誤，請稍後再試");
+      }
       setIsSubmitting(false);
     }
+  };
+
+  const handleRetry = () => {
+    setNetworkError(null);
+    handleSubmit();
   };
 
   const handleConflictReload = () => {
@@ -185,6 +212,26 @@ export function ShowForm({ show }: ShowFormProps) {
             </div>
           )}
 
+          {networkError && (
+            <div
+              className="rounded-md border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 space-y-2"
+              role="alert"
+              aria-live="assertive"
+            >
+              <p className="font-medium">{networkError}</p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleRetry}
+                className="border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500/10"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                重試
+              </Button>
+            </div>
+          )}
+
           {saveSuccess && isEdit && (
             <div className="flex gap-2 text-sm text-green-600 dark:text-green-400">
               <span>儲存成功。</span>
@@ -203,6 +250,9 @@ export function ShowForm({ show }: ShowFormProps) {
           <div className="space-y-2">
             <Label htmlFor="name" className="text-text-primary">
               節目名稱 <span className="text-warn">*</span>
+              <span className="text-text-secondary text-xs ml-2">
+                ({formData.name.length}/{MAX_NAME_LENGTH})
+              </span>
             </Label>
             <Input
               id="name"
@@ -212,11 +262,16 @@ export function ShowForm({ show }: ShowFormProps) {
                 markDirty();
               }}
               required
+              maxLength={MAX_NAME_LENGTH}
               placeholder="節目名稱"
               className="bg-surface border-border-subtle"
+              aria-describedby={fieldErrors.name ? "name-error" : undefined}
+              aria-invalid={!!fieldErrors.name}
             />
             {fieldErrors.name && (
-              <p className="text-sm text-warn">{fieldErrors.name}</p>
+              <p id="name-error" className="text-sm text-warn" role="alert">
+                {fieldErrors.name}
+              </p>
             )}
           </div>
 
@@ -235,15 +290,22 @@ export function ShowForm({ show }: ShowFormProps) {
               placeholder="show-slug（小寫英文、數字、連字號）"
               pattern="[a-z0-9-]+"
               className="bg-surface border-border-subtle"
+              aria-describedby={fieldErrors.slug ? "slug-error" : undefined}
+              aria-invalid={!!fieldErrors.slug}
             />
             {fieldErrors.slug && (
-              <p className="text-sm text-warn">{fieldErrors.slug}</p>
+              <p id="slug-error" className="text-sm text-warn" role="alert">
+                {fieldErrors.slug}
+              </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-text-primary">
               描述（選填）
+              <span className="text-text-secondary text-xs ml-2">
+                ({formData.description.length}/{MAX_DESCRIPTION_LENGTH})
+              </span>
             </Label>
             <Textarea
               id="description"
@@ -254,9 +316,16 @@ export function ShowForm({ show }: ShowFormProps) {
               }}
               placeholder="節目描述"
               rows={4}
-              maxLength={2000}
+              maxLength={MAX_DESCRIPTION_LENGTH}
               className="bg-surface border-border-subtle"
+              aria-describedby={fieldErrors.description ? "description-error" : undefined}
+              aria-invalid={!!fieldErrors.description}
             />
+            {fieldErrors.description && (
+              <p id="description-error" className="text-sm text-warn" role="alert">
+                {fieldErrors.description}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

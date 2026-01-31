@@ -105,13 +105,41 @@
 
 ---
 
-## Phase 7: Polish & Validation
+## Phase 7: Clarification Enhancements (新增需求)
+
+**Purpose**: 實作 clarify session 中確認的新需求
+
+**Source**: spec.md Clarifications Session 2026-01-31
+
+### 7.1 空狀態與錯誤處理
+
+- [x] T024 [US2] 新增節目列表空狀態 UI（插圖 + 「尚無節目，點此新增」按鈕）`src/components/admin/ShowTable.tsx`
+- [x] T025 [P] [US3][US4] 新增 API 錯誤處理 UI（錯誤類型提示 + 重試按鈕）`src/components/admin/ShowForm.tsx`
+
+### 7.2 欄位驗證強化
+
+- [x] T026 [P] [US3][US4] 新增 name 長度限制驗證（最長 200 字元）`src/components/admin/ShowForm.tsx`
+- [x] T027 [P] [US3][US4] 新增 description 長度限制驗證（最長 2000 字元，含字數顯示）`src/components/admin/ShowForm.tsx`
+
+### 7.3 可及性 (Accessibility)
+
+- [x] T028 [P] [US1] 確保所有表單欄位有對應 `<label>` 並透過 `aria-describedby` 關聯錯誤訊息 `src/components/admin/ShowForm.tsx`
+- [x] T029 [P] [US1] 確保動態訊息（Toast）使用 `role="alert"` 或 `aria-live` `src/components/admin/ShowForm.tsx`
+- [x] T030 [P] [US1] 確保後台互動元件支援鍵盤操作（Tab 導覽驗證）`src/app/(admin)/layout.tsx`
+
+**Checkpoint**: 所有 clarification 需求已實作
+
+---
+
+## Phase 8: Final Validation
 
 **Purpose**: 最終驗收與清理
 
 - [x] T021 執行 `quickstart.md` 驗收清單
 - [x] T022 確認無硬編色碼殘留（grep 搜尋 `#[0-9a-fA-F]{3,6}`）
 - [x] T023 執行 `npm run build` 確認無編譯錯誤
+- [x] T031 重新執行 `npm run build` 確認新增功能無編譯錯誤
+- [x] T032 手動測試空狀態 UI、錯誤處理、可及性功能（建議啟動 dev server 驗證）
 
 ---
 
@@ -125,7 +153,8 @@
 - **US2 (Phase 4)**: 相依 Foundational 完成
 - **US3 (Phase 5)**: 相依 Foundational 完成，與 US2 可平行
 - **US4 (Phase 6)**: 相依 Foundational 完成，與 US2/US3 可平行
-- **Polish (Phase 7)**: 相依所有 User Story 完成
+- **Clarification Enhancements (Phase 7)**: 相依 Phase 4-6 完成（補強既有功能）
+- **Final Validation (Phase 8)**: 相依所有任務完成
 
 ### User Story Dependencies
 
@@ -141,6 +170,7 @@
 - T004, T005 可平行（不同 route 檔案）
 - T016, T018 可平行（不同元件檔案）
 - US2, US3, US4 在 Foundational 完成後可平行
+- T025-T030 皆可平行（Phase 7 補強任務，不同關注點）
 
 ---
 

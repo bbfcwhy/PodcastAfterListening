@@ -38,22 +38,27 @@ export default function AdminLayout({
     <MainLayout>
       <div className="flex flex-col md:flex-row min-h-screen">
         {/* Sidebar */}
-        <aside className="w-full md:w-64 border-r border-border-subtle bg-surface p-4">
+        <aside className="w-full md:w-64 border-r border-border-subtle bg-surface p-4" role="complementary">
           <div className="space-y-2">
-            <h2 className="text-lg font-bold mb-4 text-text-primary">後台管理</h2>
-            <nav className="space-y-1">
+            <h2 id="admin-nav-heading" className="text-lg font-bold mb-4 text-text-primary">後台管理</h2>
+            <nav className="space-y-1" role="navigation" aria-labelledby="admin-nav-heading">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                  >
                     <Button
                       variant="ghost"
                       className={`w-full justify-start hover:bg-hover ${
                         active ? "bg-selected text-text-primary" : "text-text-secondary"
                       }`}
+                      tabIndex={-1}
                     >
-                      <Icon className="mr-2 h-4 w-4" />
+                      <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
                       {item.label}
                     </Button>
                   </Link>

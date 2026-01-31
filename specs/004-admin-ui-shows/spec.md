@@ -90,6 +90,8 @@
 - 若節目已有關聯的單集，刪除節目時應提示或禁止（本規格不包含刪除功能，待日後擴充）。
 - 若封面圖片 URL 無效或無法載入，列表頁應顯示預設佔位圖。
 - 編輯時發生衝突（其他管理員同時修改），應顯示衝突提示並提供重新載入或覆蓋選項（延續既有 EpisodeForm 的衝突處理機制）。
+- 若節目列表為空，顯示空狀態插圖與「尚無節目，點此新增」按鈕，引導使用者新增第一筆節目。
+- 若 API 呼叫失敗（網路錯誤、伺服器錯誤），顯示錯誤類型提示與重試按鈕（如「網路錯誤，請檢查連線後重試」），不暴露技術細節。
 
 ## Requirements *(mandatory)*
 
@@ -101,13 +103,19 @@
 - **FR-004**: 系統必須提供 `/shows` 頁面顯示所有節目列表，支援分頁。
 - **FR-005**: 系統必須提供 `/shows/{id}/edit` 頁面編輯單一節目資訊。
 - **FR-006**: 系統必須提供 `/shows/new` 頁面新增節目。
-- **FR-007**: 節目表單必須驗證必填欄位（name、slug），並檢查 slug 唯一性。
+- **FR-007**: 節目表單必須驗證必填欄位（name、slug），並檢查 slug 唯一性。slug 格式限制為小寫英文、數字、連字號（正則：`^[a-z0-9-]+$`）。
 - **FR-008**: 節目編輯表單必須實作樂觀鎖機制（檢查 updated_at 避免衝突覆蓋）。
 - **FR-009**: 後台側邊欄必須新增「節目管理」連結，使用適當圖示（如 Radio 或 Podcast icon）。
 
+### Non-Functional Requirements
+
+- **NFR-001**: 後台所有互動元件必須支援鍵盤操作（Tab 導覽、Enter/Space 觸發）。
+- **NFR-002**: 表單欄位必須有對應的 `<label>` 標籤，錯誤訊息須透過 `aria-describedby` 關聯至欄位。
+- **NFR-003**: 動態訊息（成功/錯誤提示）須使用 `role="alert"` 或 `aria-live` 確保螢幕閱讀器可讀取。
+
 ### Key Entities
 
-- **Show（節目）**: 代表一個 Podcast 節目系列，包含 id、name（名稱）、slug（URL 識別碼）、description（描述）、cover_image_url（封面圖片）、original_url（原始連結）、created_at、updated_at。
+- **Show（節目）**: 代表一個 Podcast 節目系列，包含 id、name（名稱，最長 200 字元）、slug（URL 識別碼）、description（描述，最長 2000 字元）、cover_image_url（封面圖片）、original_url（原始連結）、created_at、updated_at。
 - **設計 tokens**: 與 002-ui-reference-style 規格一致的語意化顏色變數，定義於 globals.css。
 
 ## Success Criteria *(mandatory)*
@@ -126,3 +134,13 @@
 - 延續 002-ui-reference-style 已定義的設計 tokens，無需重新定義色彩變數。
 - 節目管理功能不包含刪除節目（避免誤刪關聯單集），日後可擴充。
 - 節目管理頁面使用與 EpisodeForm、AffiliateForm 相同的表單與衝突處理模式。
+
+## Clarifications
+
+### Session 2026-01-31
+
+- Q: 節目 slug 格式規範為何？ → A: 小寫英文 + 數字 + 連字號（如 `my-podcast-123`），正則：`^[a-z0-9-]+$`
+- Q: 節目列表為空時的顯示內容？ → A: 顯示空狀態插圖 + 「尚無節目，點此新增」按鈕
+- Q: 節目名稱與描述的長度限制？ → A: name 最長 200 字元，description 最長 2000 字元
+- Q: 後台可及性要求層級？ → A: 基本合規（鍵盤操作 + 表單標籤 + 錯誤訊息 aria 關聯）
+- Q: API 呼叫失敗時的錯誤處理方式？ → A: 顯示錯誤類型提示 + 重試按鈕，不暴露技術細節

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Show } from "@/types/database";
-import { Edit, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Edit, ExternalLink, Image as ImageIcon, Plus, Radio } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -45,6 +45,25 @@ function CoverImage({ src, alt }: { src: string | null; alt: string }) {
 }
 
 export function ShowTable({ shows }: ShowTableProps) {
+  // 空狀態 UI
+  if (shows.length === 0) {
+    return (
+      <div className="bg-surface border border-border-subtle rounded-lg py-16 px-8 text-center">
+        <div className="mx-auto w-16 h-16 rounded-full bg-cta/10 flex items-center justify-center mb-4">
+          <Radio className="w-8 h-8 text-cta" />
+        </div>
+        <h3 className="text-lg font-medium text-text-primary mb-2">尚無節目</h3>
+        <p className="text-text-secondary mb-6">建立您的第一個 Podcast 節目系列</p>
+        <Button asChild className="bg-cta text-text-primary hover:bg-cta/90">
+          <Link href="/shows/new">
+            <Plus className="mr-2 h-4 w-4" />
+            新增節目
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <Table className="bg-surface">
       <TableHeader>
@@ -57,14 +76,7 @@ export function ShowTable({ shows }: ShowTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {shows.length === 0 ? (
-          <TableRow className="border-border-subtle">
-            <TableCell colSpan={5} className="text-center text-text-secondary">
-              尚無節目
-            </TableCell>
-          </TableRow>
-        ) : (
-          shows.map((show) => (
+        {shows.map((show) => (
             <TableRow key={show.id} className="border-border-subtle hover:bg-hover">
               <TableCell>
                 <CoverImage src={show.cover_image_url} alt={show.name} />
@@ -99,8 +111,7 @@ export function ShowTable({ shows }: ShowTableProps) {
                 </div>
               </TableCell>
             </TableRow>
-          ))
-        )}
+          ))}
       </TableBody>
     </Table>
   );

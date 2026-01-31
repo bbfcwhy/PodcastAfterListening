@@ -3,11 +3,12 @@ import { ShowForm } from "@/components/admin/ShowForm";
 import { notFound } from "next/navigation";
 
 interface EditShowPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default async function EditShowPage({ params }: EditShowPageProps) {
-  const { id } = await params;
+  // Note: 'slug' here is actually the show ID, named to match Next.js route group requirements
+  const { slug: id } = await params;
   const show = await getShowById(id);
 
   if (!show) {
