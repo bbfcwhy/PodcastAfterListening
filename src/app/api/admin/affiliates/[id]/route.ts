@@ -28,9 +28,51 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, description, target_url, image_url, is_active } = body;
+    const {
+      updated_at: clientUpdatedAt,
+      title,
+      description,
+      target_url,
+      image_url,
+      is_active,
+    } = body;
 
-    const updateData: any = {};
+    if (clientUpdatedAt != null) {
+      const { data: current } = await supabase
+        .from("affiliate_contents")
+        .select("updated_at")
+        .eq("id", id)
+        .single();
+
+      if (current?.updated_at) {
+        const dbUpdated = new Date(current.updated_at).getTime();
+        const clientSent = new Date(clientUpdatedAt).getTime();
+        if (dbUpdated > clientSent) {
+          return NextResponse.json(
+            {
+              reason: "newer_version",
+              current_updated_at: current.updated_at,
+            },
+            { status: 409 }
+          );
+        }
+      }
+    }
+
+    if (title !== undefined && !String(title).trim()) {
+      return NextResponse.json(
+        { error: "標題為必填", field: "title" },
+        { status: 400 }
+      );
+    }
+    if (target_url !== undefined && !String(target_url).trim()) {
+      return NextResponse.json(
+        { error: "目標連結為必填", field: "target_url" },
+        { status: 400 }
+      );
+    }
+
+    const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (target_url !== undefined) updateData.target_url = target_url;

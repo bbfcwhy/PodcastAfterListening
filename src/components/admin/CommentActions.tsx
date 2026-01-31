@@ -39,14 +39,17 @@ export function CommentActions({
   };
 
   return (
-    <div className="flex justify-end gap-2">
+    <div className="flex justify-end gap-2 flex-wrap">
       {currentStatus !== "approved" && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleStatusChange("approved")}
+          title="通過"
+          aria-label="通過"
         >
-          <Check className="h-4 w-4" />
+          <Check className="h-4 w-4 mr-1" />
+          通過
         </Button>
       )}
       {currentStatus !== "hidden" && (
@@ -54,8 +57,11 @@ export function CommentActions({
           variant="ghost"
           size="sm"
           onClick={() => handleStatusChange("hidden")}
+          title="隱藏"
+          aria-label="隱藏"
         >
-          <Eye className="h-4 w-4" />
+          <Eye className="h-4 w-4 mr-1" />
+          隱藏
         </Button>
       )}
       {currentStatus !== "spam" && (
@@ -63,8 +69,11 @@ export function CommentActions({
           variant="ghost"
           size="sm"
           onClick={() => handleStatusChange("spam")}
+          title="標記垃圾"
+          aria-label="標記垃圾"
         >
-          <Ban className="h-4 w-4" />
+          <Ban className="h-4 w-4 mr-1" />
+          標記垃圾
         </Button>
       )}
     </div>

@@ -1,6 +1,5 @@
 import { AffiliateCard } from "./AffiliateCard";
 import { AffiliateContent } from "@/types/database";
-import { EmptyState } from "@/components/ui/EmptyState";
 
 interface AffiliateSectionProps {
   affiliates: AffiliateContent[];

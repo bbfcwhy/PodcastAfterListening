@@ -11,7 +11,7 @@ export function trackPageView(path: string) {
   }
 }
 
-export function trackEvent(eventName: string, eventData?: Record<string, any>) {
+export function trackEvent(eventName: string, eventData?: Record<string, unknown>) {
   if (typeof window !== "undefined") {
     // Placeholder for event tracking
     console.log("Event:", eventName, eventData);

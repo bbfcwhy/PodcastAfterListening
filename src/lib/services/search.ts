@@ -16,7 +16,7 @@ export async function searchEpisodes(
 ): Promise<Episode[]> {
   const supabase = await createClient();
 
-  let query = supabase.rpc("search_episodes", {
+  const query = supabase.rpc("search_episodes", {
     query: filters.query || "",
     filter_show_id: filters.showId || null,
     filter_tags: filters.tags || [],

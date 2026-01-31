@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Episode, Show } from "@/types/database";
+import { Episode, Host, Show, Tag } from "@/types/database";
 
 export async function getLatestEpisodes(limit: number = 10): Promise<Episode[]> {
   const supabase = await createClient();
@@ -96,7 +96,7 @@ export async function getEpisodeDetail(
     .eq("show_id", show.id);
 
   const hosts =
-    hostsData?.map((item: any) => item.hosts).filter(Boolean) || [];
+    hostsData?.map((item: { hosts: Host | null }) => item.hosts).filter(Boolean) || [];
 
   // Get tags for this episode
   const { data: tagsData } = await supabase
@@ -104,7 +104,7 @@ export async function getEpisodeDetail(
     .select("tags(id, name, slug)")
     .eq("episode_id", episode.id);
 
-  const tags = tagsData?.map((item: any) => item.tags).filter(Boolean) || [];
+  const tags = tagsData?.map((item: { tags: Tag | null }) => item.tags).filter(Boolean) || [];
 
   return {
     episode,

@@ -1,21 +1,62 @@
 import { createClient } from "@/lib/supabase/server";
 import { Episode, Show } from "@/types/database";
+import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
-export async function getAllEpisodes(includeUnpublished: boolean = true) {
+export type GetAllEpisodesOptions = {
+  includeUnpublished?: boolean;
+  page?: number;
+  pageSize?: number;
+  title?: string;
+  is_published?: boolean;
+};
+
+export async function getAllEpisodes(
+  includeUnpublishedOrOptions: boolean | GetAllEpisodesOptions = true
+): Promise<Episode[] | { items: Episode[]; total: number }> {
   const supabase = await createClient();
-  let query = supabase.from("episodes").select("*");
+  const options: GetAllEpisodesOptions =
+    typeof includeUnpublishedOrOptions === "boolean"
+      ? { includeUnpublished: includeUnpublishedOrOptions }
+      : { includeUnpublished: true, ...includeUnpublishedOrOptions };
+
+  const {
+    includeUnpublished = true,
+    page,
+    pageSize = DEFAULT_PAGE_SIZE,
+    title,
+    is_published,
+  } = options;
+
+  let query = supabase.from("episodes").select("*", { count: "exact" });
 
   if (!includeUnpublished) {
     query = query.eq("is_published", true);
   }
+  if (title?.trim()) {
+    query = query.ilike("title", `%${title.trim()}%`);
+  }
+  if (is_published !== undefined) {
+    query = query.eq("is_published", is_published);
+  }
 
-  const { data, error } = await query.order("created_at", { ascending: false });
+  query = query.order("created_at", { ascending: false });
 
+  if (page != null && page >= 1) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    const { data, error, count } = await query.range(from, to);
+    if (error) {
+      console.error("Error fetching episodes:", error);
+      throw error;
+    }
+    return { items: data || [], total: count ?? 0 };
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error("Error fetching all episodes:", error);
     throw error;
   }
-
   return data || [];
 }
 

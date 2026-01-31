@@ -43,7 +43,7 @@ export async function GET(
       .in("id", userIds);
 
     const profilesMap = new Map(
-      profiles?.map((p) => [p.id, p]) || []
+      (profiles ?? []).map((p: { id: string }) => [p.id, p])
     );
 
     const commentsWithUsers = comments.map((comment) => ({

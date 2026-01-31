@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from "lucide-react";
-import Image from "next/image";
 
 // Note: For Next.js Image optimization, you may need to configure
 // images.remotePatterns in next.config.js for external image URLs
@@ -20,7 +19,7 @@ export function AffiliateCard({
   id,
   title,
   description,
-  targetUrl,
+  targetUrl: _targetUrl,
   imageUrl,
   episodeId,
 }: AffiliateCardProps) {
@@ -39,7 +38,6 @@ export function AffiliateCard({
       </CardHeader>
       {imageUrl && (
         <div className="relative w-full h-48">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
             alt={title}

@@ -19,7 +19,7 @@ export async function getAffiliatesByEpisode(
 
   return (
     data
-      ?.map((item: any) => item.affiliate_contents)
+      ?.map((item: { affiliate_contents: AffiliateContent | null }) => item.affiliate_contents)
       .filter(Boolean) || []
   );
 }

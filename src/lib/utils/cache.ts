@@ -8,7 +8,7 @@ interface CacheEntry<T> {
   ttl: number; // Time to live in milliseconds
 }
 
-const cache = new Map<string, CacheEntry<any>>();
+const cache = new Map<string, CacheEntry<unknown>>();
 
 export function setCache<T>(key: string, data: T, ttl: number = 3600000) {
   cache.set(key, {
