@@ -140,9 +140,9 @@ export async function getShowCategories(): Promise<string[]> {
     }
 
     const categories = new Set<string>();
-    data.forEach((row) => {
+    data.forEach((row: { show_categories?: string[] | null }) => {
         if (row.show_categories) {
-            row.show_categories.forEach((cat) => categories.add(cat));
+            row.show_categories.forEach((cat: string) => categories.add(cat));
         }
     });
 
