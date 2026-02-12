@@ -63,7 +63,7 @@ async function basicSearch(
   if (filters.query) {
     // Basic text search using ilike
     query = query.or(
-      `title.ilike.%${filters.query}%,ai_summary.ilike.%${filters.query}%,host_notes.ilike.%${filters.query}%`
+      `title.ilike.%${filters.query}%,ai_summary.ilike.%${filters.query}%,reflection.ilike.%${filters.query}%`
     );
   }
 

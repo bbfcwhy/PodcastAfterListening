@@ -24,7 +24,7 @@ export default async function EditEpisodePage({ params }: EditEpisodePageProps) 
     const originalUrl = formData.get("original_url") as string;
     const aiSummary = formData.get("ai_summary") as string;
     const aiSponsorship = formData.get("ai_sponsorship") as string;
-    const hostNotes = formData.get("host_notes") as string;
+    const transcript = formData.get("transcript") as string;
     const durationSeconds = formData.get("duration_seconds") as string;
     const isPublished = formData.get("is_published") === "on";
 
@@ -36,7 +36,7 @@ export default async function EditEpisodePage({ params }: EditEpisodePageProps) 
       original_url: originalUrl,
       ai_summary: aiSummary || null,
       ai_sponsorship: aiSponsorship || null,
-      host_notes: hostNotes || null,
+      transcript: transcript || null,
       duration_seconds: durationSeconds ? parseInt(durationSeconds) : null,
       is_published: isPublished,
     });

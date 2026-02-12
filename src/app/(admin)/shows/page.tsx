@@ -1,7 +1,6 @@
-import { getAllShows } from "@/lib/services/admin/shows";
-import { ShowTable } from "@/components/admin/ShowTable";
-import { AdminPagination } from "@/components/admin/AdminPagination";
-import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { getAdminShows, getShowCategories } from "@/lib/shows/actions";
+import { ShowList } from "@/components/admin/shows/ShowList";
+import { AdminShowToolbar } from "@/components/admin/shows/AdminShowToolbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -9,14 +8,25 @@ import { Plus } from "lucide-react";
 export default async function AdminShowsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    perPage?: string;
+    sort?: string;
+    search?: string;
+    category?: string;
+  }>;
 }) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
-  const pageSize = DEFAULT_PAGE_SIZE;
+  const perPage = parseInt(params.perPage ?? "10", 10) || 10;
+  const sort = (params.sort as any) || "custom";
+  const filter = params.search;
+  const category = params.category;
 
-  const { items: shows, total } = await getAllShows({ page, pageSize });
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const [{ data: shows, count }, categories] = await Promise.all([
+    getAdminShows({ page, perPage, sort, filter, category }),
+    getShowCategories(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -33,11 +43,13 @@ export default async function AdminShowsPage({
         </Button>
       </div>
 
-      <ShowTable shows={shows} />
-      <AdminPagination
-        currentPage={page}
-        totalPages={totalPages}
-        searchParams={{}}
+      <AdminShowToolbar categories={categories} />
+
+      <ShowList
+        initialShows={shows}
+        totalCount={count}
+        page={page}
+        perPage={perPage}
       />
     </div>
   );

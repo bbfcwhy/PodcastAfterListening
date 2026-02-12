@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Show } from "@/types/database";
+import { Show, Database } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type GetAllShowsOptions = {
@@ -80,7 +80,7 @@ export async function getShowBySlug(slug: string): Promise<Show | null> {
 }
 
 export async function createShow(
-  showData: Omit<Show, "id" | "created_at" | "updated_at">
+  showData: Database["public"]["Tables"]["shows"]["Insert"]
 ): Promise<Show> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -99,7 +99,7 @@ export async function createShow(
 
 export async function updateShow(
   id: string,
-  showData: Partial<Omit<Show, "id" | "created_at" | "updated_at">>
+  showData: Database["public"]["Tables"]["shows"]["Update"]
 ): Promise<Show> {
   const supabase = await createClient();
   const { data, error } = await supabase

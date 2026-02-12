@@ -67,7 +67,8 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
           original_url: (formData.get("original_url") as string)?.trim(),
           ai_summary: (formData.get("ai_summary") as string) || null,
           ai_sponsorship: (formData.get("ai_sponsorship") as string) || null,
-          host_notes: (formData.get("host_notes") as string) || null,
+          transcript: (formData.get("transcript") as string) || null,
+          reflection: (formData.get("reflection") as string) || null,
           duration_seconds: formData.get("duration_seconds")
             ? parseInt(formData.get("duration_seconds") as string, 10)
             : null,
@@ -141,7 +142,8 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
       original_url: (formData.get("original_url") as string)?.trim(),
       ai_summary: (formData.get("ai_summary") as string) || null,
       ai_sponsorship: (formData.get("ai_sponsorship") as string) || null,
-      host_notes: (formData.get("host_notes") as string) || null,
+      transcript: (formData.get("transcript") as string) || null,
+      reflection: (formData.get("reflection") as string) || null,
       duration_seconds: formData.get("duration_seconds")
         ? parseInt(formData.get("duration_seconds") as string, 10)
         : null,
@@ -351,7 +353,7 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="ai_sponsorship">業配內容（選填）</Label>
+        <Label htmlFor="ai_sponsorship">業配內容（選填，支援 Markdown）</Label>
         <Textarea
           id="ai_sponsorship"
           name="ai_sponsorship"
@@ -363,15 +365,28 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="host_notes">
-          站長心得（選填，最多 {EPISODE_LONG_TEXT_MAX_LENGTH.toLocaleString()} 字）
+        <Label htmlFor="transcript">
+          逐字稿（選填，支援 Markdown）
         </Label>
         <Textarea
-          id="host_notes"
-          name="host_notes"
-          defaultValue={episode?.host_notes || ""}
+          id="transcript"
+          name="transcript"
+          defaultValue={episode?.transcript || ""}
+          rows={10}
+          disabled={loading}
+          onChange={markDirty}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reflection">
+          站長心得（原 Host Notes，支援 Markdown）
+        </Label>
+        <Textarea
+          id="reflection"
+          name="reflection"
+          defaultValue={episode?.reflection || ""}
           rows={6}
-          maxLength={EPISODE_LONG_TEXT_MAX_LENGTH}
           disabled={loading}
           onChange={markDirty}
         />
@@ -417,6 +432,6 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
           取消
         </Button>
       </div>
-    </form>
+    </form >
   );
 }

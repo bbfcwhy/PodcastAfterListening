@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Show } from "@/types/database";
 import { ChevronRight, Podcast } from "lucide-react";
+import { stripHtml } from "@/lib/utils/sanitize";
 
 interface ShowCardProps {
   show: Show;
@@ -10,7 +11,7 @@ interface ShowCardProps {
 
 export function ShowCard({ show, episodeCount }: ShowCardProps) {
   return (
-    <div className="group bg-surface rounded-[3rem] overflow-hidden border border-border-subtle hover:border-cta/30 transition-all hover:shadow-md shadow-sm">
+    <div className="group bg-surface rounded-[2.5rem] overflow-hidden border border-border-subtle hover:border-cta/30 transition-all hover:shadow-md shadow-sm">
       <div className="aspect-[4/5] relative overflow-hidden">
         {show.cover_image_url ? (
           <Image
@@ -32,7 +33,7 @@ export function ShowCard({ show, episodeCount }: ShowCardProps) {
       <div className="p-8 md:p-12 pt-6 md:pt-8">
         {show.description && (
           <p className="text-text-secondary text-sm mb-8 md:mb-10 line-clamp-2 leading-relaxed font-bold">
-            {show.description}
+            {stripHtml(show.description)}
           </p>
         )}
         {episodeCount !== undefined && (
@@ -42,9 +43,9 @@ export function ShowCard({ show, episodeCount }: ShowCardProps) {
         )}
         <Link
           href={`/shows/${show.slug}`}
-          className="flex items-center justify-center gap-3 w-full py-5 bg-canvas rounded-[1.2rem] text-[11px] font-black text-text-primary uppercase tracking-widest hover:bg-cta hover:text-text-primary transition-all"
+          className="flex items-center justify-center gap-3 w-full py-5 bg-canvas rounded-[1.5rem] text-[11px] font-black text-text-primary uppercase tracking-widest hover:bg-cta hover:text-text-primary transition-all"
         >
-          進入內容百科 <ChevronRight size={16} />
+          進入節目列表 <ChevronRight size={16} />
         </Link>
       </div>
     </div>

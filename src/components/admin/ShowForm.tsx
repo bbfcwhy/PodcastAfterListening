@@ -35,6 +35,10 @@ export function ShowForm({ show }: ShowFormProps) {
     description: show?.description ?? "",
     cover_image_url: show?.cover_image_url ?? "",
     original_url: show?.original_url ?? "",
+    rss_feed_url: show?.rss_feed_url ?? "",
+    hosting_provided_by: show?.hosting_provided_by ?? "",
+    tags: show?.tags?.join(", ") ?? "",
+    show_categories: show?.show_categories?.join(", ") ?? "",
   });
 
   const isEdit = !!show;
@@ -71,7 +75,11 @@ export function ShowForm({ show }: ShowFormProps) {
     try {
       const url = show ? `/api/admin/shows/${show.id}` : "/api/admin/shows";
       const method = show ? "PATCH" : "POST";
-      const body: Record<string, unknown> = { ...formData };
+      const body: Record<string, unknown> = {
+        ...formData,
+        tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : null,
+        show_categories: formData.show_categories ? formData.show_categories.split(",").map((c: string) => c.trim()).filter(Boolean) : null,
+      };
       if (show?.updated_at) body.updated_at = show.updated_at;
 
       const response = await fetch(url, {
@@ -358,6 +366,71 @@ export function ShowForm({ show }: ShowFormProps) {
                 markDirty();
               }}
               placeholder="https://podcasts.apple.com/..."
+              className="bg-surface border-border-subtle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="rss_feed_url" className="text-text-primary">
+              RSS Feed URL（選填）
+            </Label>
+            <Input
+              id="rss_feed_url"
+              type="url"
+              value={formData.rss_feed_url}
+              onChange={(e) => {
+                setFormData({ ...formData, rss_feed_url: e.target.value });
+                markDirty();
+              }}
+              placeholder="https://feeds.example.com/rss"
+              className="bg-surface border-border-subtle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="hosting_provided_by" className="text-text-primary">
+              Hosting Provider（選填）
+            </Label>
+            <Input
+              id="hosting_provided_by"
+              value={formData.hosting_provided_by}
+              onChange={(e) => {
+                setFormData({ ...formData, hosting_provided_by: e.target.value });
+                markDirty();
+              }}
+              placeholder="例如: Firstory, Soundcloud"
+              className="bg-surface border-border-subtle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tags" className="text-text-primary">
+              標籤（選填，以逗號分隔）
+            </Label>
+            <Input
+              id="tags"
+              value={formData.tags}
+              onChange={(e) => {
+                setFormData({ ...formData, tags: e.target.value });
+                markDirty();
+              }}
+              placeholder="tag1, tag2, tag3"
+              className="bg-surface border-border-subtle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="show_categories" className="text-text-primary">
+              分類（選填，以逗號分隔）
+            </Label>
+            <Input
+              id="show_categories"
+              value={formData.show_categories}
+              onChange={(e) => {
+                setFormData({ ...formData, show_categories: e.target.value });
+                markDirty();
+              }}
+              placeholder="Music, Tech, News"
               className="bg-surface border-border-subtle"
             />
           </div>

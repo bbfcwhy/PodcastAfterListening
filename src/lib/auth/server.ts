@@ -36,3 +36,17 @@ export async function getSession() {
 
   return session;
 }
+
+export async function getCurrentProfile() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  return profile;
+}

@@ -5,7 +5,7 @@ export async function getLatestEpisodes(limit: number = 10): Promise<Episode[]> 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("episodes")
-    .select("*")
+    .select("*, comments(count)")
     .eq("is_published", true)
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
@@ -23,7 +23,7 @@ export async function getEpisodesByShow(showId: string): Promise<Episode[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("episodes")
-    .select("*")
+    .select("*, comments(count)")
     .eq("show_id", showId)
     .eq("is_published", true)
     .order("published_at", { ascending: false, nullsFirst: false })
@@ -43,11 +43,15 @@ export async function getEpisodeWithShow(
 ): Promise<{ episode: Episode; show: Show } | null> {
   const supabase = await createClient();
 
+  // Decode slugs to ensure chinese characters are handled correctly
+  const decodedShowSlug = decodeURIComponent(showSlug);
+  const decodedEpisodeSlug = decodeURIComponent(episodeSlug);
+
   // First get the show
   const { data: show, error: showError } = await supabase
     .from("shows")
     .select("*")
-    .eq("slug", showSlug)
+    .eq("slug", decodedShowSlug)
     .single();
 
   if (showError || !show) {
@@ -59,7 +63,7 @@ export async function getEpisodeWithShow(
     .from("episodes")
     .select("*")
     .eq("show_id", show.id)
-    .eq("slug", episodeSlug)
+    .eq("slug", decodedEpisodeSlug)
     .eq("is_published", true)
     .single();
 

@@ -1,19 +1,14 @@
 import { ShowCard } from "./ShowCard";
 import { Show } from "@/types/database";
-import { getShowWithEpisodeCount } from "@/lib/services/shows";
 import { Podcast } from "lucide-react";
 
 interface ShowGridProps {
   shows: Show[];
 }
 
-export async function ShowGrid({ shows }: ShowGridProps) {
-  const showsWithCounts = await Promise.all(
-    shows.map(async (show) => {
-      const count = await getShowWithEpisodeCount(show.id);
-      return { show, count };
-    })
-  );
+export function ShowGrid({ shows }: ShowGridProps) {
+  // shows now already contains episode_count from the updated getShows service
+  const showsWithCounts = shows as (Show & { episode_count: number })[];
 
   if (showsWithCounts.length === 0) {
     return null;
@@ -25,8 +20,8 @@ export async function ShowGrid({ shows }: ShowGridProps) {
         <Podcast className="text-info" size={28} /> 頻道內容專區
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
-        {showsWithCounts.map(({ show, count }) => (
-          <ShowCard key={show.id} show={show} episodeCount={count} />
+        {showsWithCounts.map((show) => (
+          <ShowCard key={show.id} show={show} episodeCount={show.episode_count} />
         ))}
       </div>
     </div>

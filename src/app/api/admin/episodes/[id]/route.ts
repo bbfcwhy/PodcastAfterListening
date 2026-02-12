@@ -41,7 +41,8 @@ export async function PATCH(
       original_url,
       ai_summary,
       ai_sponsorship,
-      host_notes,
+      transcript,
+      reflection,
       duration_seconds,
       is_published,
     } = body;
@@ -97,7 +98,8 @@ export async function PATCH(
     if (original_url !== undefined) updateData.original_url = original_url;
     if (ai_summary !== undefined) updateData.ai_summary = ai_summary;
     if (ai_sponsorship !== undefined) updateData.ai_sponsorship = ai_sponsorship;
-    if (host_notes !== undefined) updateData.host_notes = host_notes;
+    if (transcript !== undefined) updateData.transcript = transcript;
+    if (reflection !== undefined) updateData.reflection = reflection;
     if (duration_seconds !== undefined)
       updateData.duration_seconds = duration_seconds;
     if (is_published !== undefined) updateData.is_published = is_published;

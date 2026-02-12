@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { Episode, Show } from "@/types/database";
+import { Episode, Show, Database } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type GetAllEpisodesOptions = {
@@ -80,7 +80,7 @@ export async function getEpisodeById(id: string): Promise<Episode | null> {
 }
 
 export async function createEpisode(
-  episodeData: Omit<Episode, "id" | "created_at" | "updated_at">
+  episodeData: Database["public"]["Tables"]["episodes"]["Insert"]
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -99,7 +99,7 @@ export async function createEpisode(
 
 export async function updateEpisode(
   id: string,
-  episodeData: Partial<Omit<Episode, "id" | "created_at" | "updated_at">>
+  episodeData: Database["public"]["Tables"]["episodes"]["Update"]
 ) {
   const supabase = await createClient();
   const { data, error } = await supabase

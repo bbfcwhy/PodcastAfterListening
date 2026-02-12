@@ -1,6 +1,50 @@
 # n8n 與 Supabase 整合：AI 分析結果上傳
 
-本文件說明如何把現有三個 n8n workflow（巡邏、逐字稿、自動撰文）的結果上傳到 Supabase，以及要填寫的欄位與整合方式。
+本文件說明如何把現有三個 n8n workflow（巡邏、逐字稿、自動撰文）的結果上傳到 Supabase，以及要填寫的欄位與整合方式。並說明 **RSS 同步** workflow 的用法。
+
+---
+
+## RSS 同步 workflow：n8n-workflow-rss-sync.json
+
+專案根目錄的 **n8n-workflow-rss-sync.json** 會從 Supabase 讀取「有填 `rss_feed_url` 的節目」，對每個節目呼叫網站的 `POST /api/admin/shows/{id}/sync-rss`，把 RSS 的節目／單集資訊寫回 Supabase（節目圖、名稱、關於、Hosting、Tags、單集說明等），前台即顯示最新資料。
+
+**使用前準備：**
+
+1. **網站環境變數**（.env.local）
+   - `RSS_SYNC_API_KEY`：自訂一組密鑰（供 n8n 帶在 header 驗證）
+   - `SUPABASE_SERVICE_ROLE_KEY`：Supabase 專案 → Settings → API → service_role key（API Key 驗證時會用此寫入 DB）
+
+2. **n8n**
+   - 匯入 `n8n-workflow-rss-sync.json`
+   - 新增 **Supabase** 認證（同專案）
+   - 在「設定 API 參數」節點填：`base_url`（網站根網址）、`api_key`（與 RSS_SYNC_API_KEY 相同）
+
+3. **Supabase**
+   - 在 `shows` 表為要同步的節目填上 `rss_feed_url`
+
+**觸發**：手動執行或啟用「排程觸發 (可選)」定時跑。每次執行會對所有有 RSS 的節目各呼叫一次 sync-rss API。
+
+---
+
+## 四條 workflow 與 RSS 同步：改哪一條？
+
+你現在有四條 n8n workflow，若要把「從 RSS 更新節目／單集到 Supabase」接進去，建議如下。
+
+| Workflow | 用途 | 與 RSS 同步的關係 | 建議 |
+|----------|------|-------------------|------|
+| **PAL_巡邏** | 從 Subscriptions 讀 feed_url，讀 RSS，把新單集寫入 Episodes 表 | 已經在讀 RSS、手上有 feed_url 與 podcast_id；每巡邏一個節目就等於「該節目有更新」 | **最適合**：在「寫入 Episodes」之後，用 podcast_id 查 Supabase shows 拿 show id，呼叫 POST sync-rss，該節目的節目級與單集級欄位就會同步到網站 |
+| **PAL_自動撰文** | 從 Episodes 拿 status=srt_uploaded，下載 SRT、撰文、審稿通過後「準備 Supabase 單集資料 → Upsert 單集到 Supabase」 | 已經會寫入 Supabase 單集；在 Upsert 之後對該 show_id 呼叫 sync-rss，可補齊節目圖、關於、單集說明等 | **次選**：在「Upsert 單集到 Supabase」之後加一步「呼叫 RSS 同步 API」（帶 show_id），每次上傳單集後該節目與單集的 RSS 元資料一併更新 |
+| **PAL_上傳到Supabase_v2** | 從 Google Drive 草稿讀 Doc，解析業配／節目內容，查/建 Show，上傳單集到 Supabase | 也是「寫入 Supabase 單集」；在寫入之後對該 show 呼叫 sync-rss 同樣可補齊 RSS 欄位 | **可選**：同上，在寫入 Supabase 之後加「呼叫 sync-rss」 |
+| **PAL_逐字稿** | 從 Episodes 拿 status=new，下載音檔、轉寫、上傳 SRT、更新表單 | 不直接寫 Supabase，也不讀 RSS；加 RSS 同步意義不大 | **不建議**：維持現狀即可 |
+
+**結論**  
+- **優先改 PAL_巡邏**：資料流一致（RSS → 巡邏 → 寫入 Episodes + 同步到 Supabase），一次巡邏就同時更新 Sheets 與網站節目／單集。  
+- **若你希望「每次有單集寫入 Supabase 後才更新 RSS 元資料」**，就改 **PAL_自動撰文** 或 **PAL_上傳到Supabase_v2**，在「寫入 Supabase」之後加一步呼叫 `POST /api/admin/shows/{show_id}/sync-rss`（需帶 header `X-RSS-Sync-Key`）。
+
+**PAL_巡邏 插入點（建議）**  
+1. 在「寫入 Episodes」節點之後，加一個 **Supabase** 節點：查 `shows` 表，filter `slug = {{ $('Loop Over Items').first().json.podcast_id }}`（或你 Subscriptions 裡對應節目 slug 的欄位），取 `id`。  
+2. 再加一個 **HTTP Request** 節點：`POST {{ 你的網站 base_url }}/api/admin/shows/{{ $json.id }}/sync-rss`，header `X-RSS-Sync-Key: {{ 你的 RSS_SYNC_API_KEY }}`。  
+這樣每巡邏完一個節目、寫入新單集到 Episodes 後，就會對該節目跑一次 RSS 同步，網站上的節目圖、關於、Hosting、Tags、單集說明等會更新。
 
 ---
 
