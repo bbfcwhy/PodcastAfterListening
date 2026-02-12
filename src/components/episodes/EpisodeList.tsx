@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EpisodeCard } from "./EpisodeCard";
-import { Episode, Show } from "@/types/database";
+import type { Episode, Show } from "@/types/database";
 import { Pagination } from "@/components/ui/Pagination";
 
 interface EpisodeListProps {

@@ -1,6 +1,6 @@
 import { EpisodeCard } from "@/components/episodes/EpisodeCard";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Episode, Show } from "@/types/database";
+import type { Episode, Show } from "@/types/database";
 
 interface SearchResultsProps {
   episodes: Episode[];

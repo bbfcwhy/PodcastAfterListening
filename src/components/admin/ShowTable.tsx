@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { Edit, ExternalLink, Image as ImageIcon, Plus, Radio } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";

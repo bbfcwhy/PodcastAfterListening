@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Host } from "@/types/database";
+import type { Host } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export async function getHostsByShow(showId: string): Promise<Host[]> {
   const supabase = await createClient();
@@ -9,7 +10,7 @@ export async function getHostsByShow(showId: string): Promise<Host[]> {
     .eq("show_id", showId);
 
   if (error) {
-    console.error("Error fetching hosts by show:", error);
+    logger.error("Error fetching hosts by show:", error);
     return [];
   }
 

@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
@@ -87,7 +89,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Error updating affiliate:", error);
+      logger.error("Error updating affiliate:", error);
       return NextResponse.json(
         { error: "Failed to update affiliate" },
         { status: 500 }
@@ -96,7 +98,7 @@ export async function PATCH(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in PATCH /api/admin/affiliates/[id]:", error);
+    logger.error("Error in PATCH /api/admin/affiliates/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -136,7 +138,7 @@ export async function DELETE(
       .eq("id", id);
 
     if (error) {
-      console.error("Error deleting affiliate:", error);
+      logger.error("Error deleting affiliate:", error);
       return NextResponse.json(
         { error: "Failed to delete affiliate" },
         { status: 500 }
@@ -145,7 +147,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in DELETE /api/admin/affiliates/[id]:", error);
+    logger.error("Error in DELETE /api/admin/affiliates/[id]:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

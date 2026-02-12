@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export async function getShows(): Promise<(Show & { episode_count: number })[]> {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export async function getShows(): Promise<(Show & { episode_count: number })[]> 
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching shows:", error);
+    logger.error("Error fetching shows:", error);
     throw error;
   }
 
@@ -38,7 +39,7 @@ export async function getShowBySlug(slug: string): Promise<Show | null> {
       // No rows returned
       return null;
     }
-    console.error("Error fetching show by slug:", error);
+    logger.error("Error fetching show by slug:", error);
     throw error;
   }
 
@@ -54,7 +55,7 @@ export async function getShowWithEpisodeCount(showId: string): Promise<number> {
     .eq("is_published", true);
 
   if (error) {
-    console.error("Error counting episodes:", error);
+    logger.error("Error counting episodes:", error);
     return 0;
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Episode, Show } from "@/types/database";
+import type { Episode, Show } from "@/types/database";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EPISODE_LONG_TEXT_MAX_LENGTH } from "@/lib/constants";
@@ -113,7 +114,7 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
         router.refresh();
       }
     } catch (error) {
-      console.error("Error submitting episode:", error);
+      logger.error("Error submitting episode:", error);
       toast.error(
         error instanceof Error ? error.message : "操作失敗，請稍後再試"
       );

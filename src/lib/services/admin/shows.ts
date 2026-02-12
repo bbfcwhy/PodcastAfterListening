@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { Show, Database } from "@/types/database";
+import type { Show, Database } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 export type GetAllShowsOptions = {
   page?: number;
@@ -27,7 +28,7 @@ export async function getAllShows(
     const to = from + pageSize - 1;
     const { data, error, count } = await query.range(from, to);
     if (error) {
-      console.error("Error fetching shows:", error);
+      logger.error("Error fetching shows:", error);
       throw error;
     }
     return { items: data || [], total: count ?? 0 };
@@ -35,7 +36,7 @@ export async function getAllShows(
 
   const { data, error, count } = await query;
   if (error) {
-    console.error("Error fetching all shows:", error);
+    logger.error("Error fetching all shows:", error);
     throw error;
   }
   return { items: data || [], total: count ?? 0 };
@@ -53,7 +54,7 @@ export async function getShowById(id: string): Promise<Show | null> {
     if (error.code === "PGRST116") {
       return null;
     }
-    console.error("Error fetching show by id:", error);
+    logger.error("Error fetching show by id:", error);
     throw error;
   }
 
@@ -72,7 +73,7 @@ export async function getShowBySlug(slug: string): Promise<Show | null> {
     if (error.code === "PGRST116") {
       return null;
     }
-    console.error("Error fetching show by slug:", error);
+    logger.error("Error fetching show by slug:", error);
     throw error;
   }
 
@@ -90,7 +91,7 @@ export async function createShow(
     .single();
 
   if (error) {
-    console.error("Error creating show:", error);
+    logger.error("Error creating show:", error);
     throw error;
   }
 
@@ -110,7 +111,7 @@ export async function updateShow(
     .single();
 
   if (error) {
-    console.error("Error updating show:", error);
+    logger.error("Error updating show:", error);
     throw error;
   }
 

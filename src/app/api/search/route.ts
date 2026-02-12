@@ -1,5 +1,7 @@
 import { searchEpisodes } from "@/lib/services/search";
-import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ episodes, count: episodes.length });
   } catch (error) {
-    console.error("Error in search API:", error);
+    logger.error("Error in search API:", error);
     return NextResponse.json(
       { error: "Failed to perform search" },
       { status: 500 }

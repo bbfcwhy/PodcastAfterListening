@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 export function isAdmin(email?: string | null): boolean {
     if (!email) return false;
 
@@ -5,7 +7,7 @@ export function isAdmin(email?: string | null): boolean {
     const adminEmails = process.env.ADMIN_EMAILS || "bbfcwhy@gmail.com";
 
     // Direct debug in helper
-    console.log("[isAdmin] Checking:", email, "against", adminEmails);
+    logger.debug("[isAdmin] Checking:", email, "against", adminEmails);
     const admins = adminEmails.split(",").map(e => e.trim().toLowerCase());
 
     return admins.includes(email.toLowerCase());

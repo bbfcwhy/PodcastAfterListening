@@ -1,5 +1,7 @@
 import { updateCommentStatus } from "@/lib/services/admin/comments";
-import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
@@ -25,7 +27,7 @@ export async function PATCH(
 
     return NextResponse.json({ comment });
   } catch (error) {
-    console.error("Error updating comment status:", error);
+    logger.error("Error updating comment status:", error);
     return NextResponse.json(
       { error: "Failed to update comment status" },
       { status: 500 }

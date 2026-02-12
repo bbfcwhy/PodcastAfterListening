@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { getAllShows, createShow, getShowBySlug } from "@/lib/services/admin/shows";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
     const result = await getAllShows({ page, pageSize, name });
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error in GET /api/admin/shows:", error);
+    logger.error("Error in GET /api/admin/shows:", error);
     return NextResponse.json(
       { error: "Failed to fetch shows" },
       { status: 500 }
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Error in POST /api/admin/shows:", error);
+    logger.error("Error in POST /api/admin/shows:", error);
     return NextResponse.json(
       { error: "Failed to create show" },
       { status: 500 }

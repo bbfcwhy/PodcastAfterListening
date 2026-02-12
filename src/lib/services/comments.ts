@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Comment } from "@/types/database";
+import type { Comment } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export async function getCommentsByEpisode(
   episodeId: string,
@@ -16,7 +17,7 @@ export async function getCommentsByEpisode(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error fetching comments:", error);
+    logger.error("Error fetching comments:", error);
     throw error;
   }
 
@@ -52,7 +53,7 @@ export async function createComment(
     .single();
 
   if (error) {
-    console.error("Error creating comment:", error);
+    logger.error("Error creating comment:", error);
     throw error;
   }
 
@@ -68,7 +69,7 @@ export async function getCommentCount(episodeId: string): Promise<number> {
     .eq("status", "approved");
 
   if (error) {
-    console.error("Error counting comments:", error);
+    logger.error("Error counting comments:", error);
     return 0;
   }
 

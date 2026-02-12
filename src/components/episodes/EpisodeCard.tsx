@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Episode, Show } from "@/types/database";
+import type { Episode, Show } from "@/types/database";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { ChevronRight, Podcast, Play } from "lucide-react";
@@ -60,8 +60,10 @@ export function EpisodeCard({ episode, show }: EpisodeCardProps) {
 
       <div className="flex items-center justify-between mt-auto pt-4 border-t border-border-subtle/50">
         <span className="text-xs font-bold text-text-secondary">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(episode as any).duration ? `${Math.floor((episode as any).duration / 60)} min` : "Audio"}
+          {/* Optional duration field from extended Episode type */}
+          {"duration" in episode && typeof episode.duration === "number"
+            ? `${Math.floor(episode.duration / 60)} min`
+            : "Audio"}
         </span>
         <span className="text-xs font-bold text-cta group-hover/card:translate-x-1 transition-transform flex items-center gap-1">
           PLAY <Play size={10} fill="currentColor" />
@@ -86,11 +88,16 @@ export function EpisodeCard({ episode, show }: EpisodeCardProps) {
             </span>
           )}
           {/* Check for comment count if available (assuming extended type or property) */}
-          {(episode as any).comments && (episode as any).comments[0]?.count > 0 && (
-            <span className="text-[9px] font-black text-text-primary uppercase tracking-tighter bg-cta/20 px-3 py-1.5 rounded-full">
-              網友討論
-            </span>
-          )}
+          {"comments" in episode &&
+            Array.isArray(episode.comments) &&
+            episode.comments[0] &&
+            typeof episode.comments[0] === "object" &&
+            "count" in episode.comments[0] &&
+            (episode.comments[0] as { count: number }).count > 0 && (
+              <span className="text-[9px] font-black text-text-primary uppercase tracking-tighter bg-cta/20 px-3 py-1.5 rounded-full">
+                網友討論
+              </span>
+            )}
         </div>
         <div className="w-8 h-8 rounded-full bg-hover flex items-center justify-center text-cta group-hover:bg-cta group-hover:text-text-primary transition-all">
           <ChevronRight size={16} />

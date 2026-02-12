@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { AffiliateContent } from "@/types/database";
+import { logger } from "@/lib/logger";
+import type { AffiliateContent } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type GetAffiliatesOptions = {
@@ -23,7 +24,7 @@ export async function getAffiliates(
     .range(from, to);
 
   if (error) {
-    console.error("Error fetching affiliates:", error);
+    logger.error("Error fetching affiliates:", error);
     throw error;
   }
 

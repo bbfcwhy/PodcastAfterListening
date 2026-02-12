@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { getAffiliates } from "@/lib/services/admin/affiliates";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
     const { items, total } = await getAffiliates({ page, pageSize });
     return NextResponse.json({ items, total });
   } catch (error) {
-    console.error("Error in GET /api/admin/affiliates:", error);
+    logger.error("Error in GET /api/admin/affiliates:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating affiliate:", error);
+      logger.error("Error creating affiliate:", error);
       return NextResponse.json(
         { error: "Failed to create affiliate" },
         { status: 500 }
@@ -95,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in POST /api/admin/affiliates:", error);
+    logger.error("Error in POST /api/admin/affiliates:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

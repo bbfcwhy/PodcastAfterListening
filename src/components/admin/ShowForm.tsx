@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/logger";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 
@@ -123,7 +124,7 @@ export function ShowForm({ show }: ShowFormProps) {
       }
       setIsSubmitting(false);
     } catch (error) {
-      console.error("Error saving show:", error);
+      logger.error("Error saving show:", error);
       // 判斷錯誤類型，提供友善提示
       if (error instanceof TypeError && error.message.includes("fetch")) {
         setNetworkError("網路連線錯誤，請檢查網路後重試");

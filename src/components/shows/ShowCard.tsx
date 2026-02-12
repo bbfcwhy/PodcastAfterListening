@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { ChevronRight, Podcast } from "lucide-react";
 import { stripHtml } from "@/lib/utils/sanitize";
 

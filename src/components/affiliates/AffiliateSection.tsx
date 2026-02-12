@@ -1,5 +1,5 @@
 import { AffiliateCard } from "./AffiliateCard";
-import { AffiliateContent } from "@/types/database";
+import type { AffiliateContent } from "@/types/database";
 
 interface AffiliateSectionProps {
   affiliates: AffiliateContent[];

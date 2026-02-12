@@ -10,21 +10,22 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { Edit, ExternalLink, Image as ImageIcon, Plus, Radio } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import Image from "next/image";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import type {
+    DragEndEvent} from "@dnd-kit/core";
 import {
     DndContext,
     closestCenter,
     KeyboardSensor,
     PointerSensor,
     useSensor,
-    useSensors,
-    DragEndEvent,
+    useSensors
 } from "@dnd-kit/core";
 import {
     arrayMove,
@@ -36,6 +37,7 @@ import { SortableShowRow } from "./SortableShowRow";
 import { updateShowOrder } from "@/lib/shows/actions";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 interface ShowListProps {
     initialShows: Show[];
@@ -124,8 +126,20 @@ export function ShowList({
                 await updateShowOrder(updatePayload);
                 toast.success("順序已更新");
             } catch (err) {
-                toast.error("更新順序失敗");
-                console.error(err);
+                const errorMessage = err instanceof Error ? err.message : "未知錯誤";
+                toast.error(`更新順序失敗: ${errorMessage}`);
+
+                // Log error with context for debugging
+                logger.errorWithContext(
+                    "Failed to update show order",
+                    err,
+                    {
+                        itemCount: newItems.length,
+                        page,
+                        perPage,
+                    }
+                );
+
                 setItems(items); // Revert on failure
             }
         }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/logger";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AffiliateContent } from "@/types/database";
+import type { AffiliateContent } from "@/types/database";
 import { toast } from "sonner";
 
 type FieldError = Record<string, string>;
@@ -95,7 +96,7 @@ export function AffiliateForm({ affiliate }: AffiliateFormProps) {
       }
       setIsSubmitting(false);
     } catch (error) {
-      console.error("Error saving affiliate:", error);
+      logger.error("Error saving affiliate:", error);
       toast.error(
         error instanceof Error ? error.message : "操作失敗，請稍後再試"
       );

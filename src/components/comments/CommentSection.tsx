@@ -3,7 +3,7 @@
 import { CommentList } from "./CommentList";
 import { CommentForm } from "./CommentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Comment } from "@/types/database";
+import type { Comment } from "@/types/database";
 import useSWR from "swr";
 
 interface CommentWithUser extends Comment {

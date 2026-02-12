@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Show, Tag } from "@/types/database";
+import type { Show, Tag } from "@/types/database";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface SearchFiltersProps {

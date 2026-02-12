@@ -4,7 +4,9 @@ import {
   getShowBySlug,
   updateShow,
 } from "@/lib/services/admin/shows";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -38,7 +40,7 @@ export async function GET(
 
     return NextResponse.json(show);
   } catch (error) {
-    console.error("Error in GET /api/admin/shows/[id]:", error);
+    logger.error("Error in GET /api/admin/shows/[id]:", error);
     return NextResponse.json(
       { error: "Failed to fetch show" },
       { status: 500 }
@@ -147,7 +149,7 @@ export async function PATCH(
     const data = await updateShow(id, updateData);
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in PATCH /api/admin/shows/[id]:", error);
+    logger.error("Error in PATCH /api/admin/shows/[id]:", error);
     return NextResponse.json(
       { error: "Failed to update show" },
       { status: 500 }
@@ -160,7 +162,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  console.log("DELETE show requested for id:", id);
+  logger.debug("DELETE show requested for id:", id);
   return NextResponse.json(
     { error: "刪除功能尚未開放" },
     { status: 501 }

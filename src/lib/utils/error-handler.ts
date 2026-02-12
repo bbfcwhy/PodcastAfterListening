@@ -2,6 +2,8 @@
  * Error handling utilities for graceful degradation
  */
 
+import { logger } from "@/lib/logger";
+
 export class SupabaseError extends Error {
   constructor(message: string) {
     super(message);
@@ -23,8 +25,8 @@ export async function withFallback<T>(
     }
     return result;
   } catch (error) {
-    console.error("Error in withFallback:", error);
-    
+    logger.error("Error in withFallback:", error);
+
     // Try to get from cache
     if (cacheKey) {
       const { getCache } = await import("./cache");
@@ -33,7 +35,7 @@ export async function withFallback<T>(
         return cached;
       }
     }
-    
+
     return fallback;
   }
 }

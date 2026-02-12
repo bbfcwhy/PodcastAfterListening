@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Episode, Show, Database } from "@/types/database";
+import { logger } from "@/lib/logger";
+import type { Episode, Show, Database } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type GetAllEpisodesOptions = {
@@ -46,7 +47,7 @@ export async function getAllEpisodes(
     const to = from + pageSize - 1;
     const { data, error, count } = await query.range(from, to);
     if (error) {
-      console.error("Error fetching episodes:", error);
+      logger.error("Error fetching episodes:", error);
       throw error;
     }
     return { items: data || [], total: count ?? 0 };
@@ -54,7 +55,7 @@ export async function getAllEpisodes(
 
   const { data, error } = await query;
   if (error) {
-    console.error("Error fetching all episodes:", error);
+    logger.error("Error fetching all episodes:", error);
     throw error;
   }
   return data || [];
@@ -72,7 +73,7 @@ export async function getEpisodeById(id: string): Promise<Episode | null> {
     if (error.code === "PGRST116") {
       return null;
     }
-    console.error("Error fetching episode by id:", error);
+    logger.error("Error fetching episode by id:", error);
     throw error;
   }
 
@@ -90,7 +91,7 @@ export async function createEpisode(
     .single();
 
   if (error) {
-    console.error("Error creating episode:", error);
+    logger.error("Error creating episode:", error);
     throw error;
   }
 
@@ -110,7 +111,7 @@ export async function updateEpisode(
     .single();
 
   if (error) {
-    console.error("Error updating episode:", error);
+    logger.error("Error updating episode:", error);
     throw error;
   }
 
@@ -122,7 +123,7 @@ export async function deleteEpisode(id: string) {
   const { error } = await supabase.from("episodes").delete().eq("id", id);
 
   if (error) {
-    console.error("Error deleting episode:", error);
+    logger.error("Error deleting episode:", error);
     throw error;
   }
 }
@@ -135,7 +136,7 @@ export async function getAllShows(): Promise<Show[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching shows:", error);
+    logger.error("Error fetching shows:", error);
     throw error;
   }
 

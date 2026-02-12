@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { logger } from "@/lib/logger";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Episode, Show } from "@/types/database";
+import type { Episode, Show } from "@/types/database";
 import { Edit, Trash2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +53,7 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
       toast.success(episode.is_published ? "已改為下架" : "已改為上架");
       router.refresh();
     } catch (error) {
-      console.error("Error toggling published:", error);
+      logger.error("Error toggling published:", error);
       toast.error("切換失敗");
     } finally {
       setTogglingId(null);
@@ -72,7 +73,7 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
           alert("刪除失敗");
         }
       } catch (error) {
-        console.error("Error deleting episode:", error);
+        logger.error("Error deleting episode:", error);
         alert("刪除失敗");
       }
     }

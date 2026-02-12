@@ -1,7 +1,7 @@
 "use client";
 
-import { User } from "@supabase/supabase-js";
-import { Profile } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
+import type { Profile } from "@/types/database";
 import {
     DropdownMenu,
     DropdownMenuContent,

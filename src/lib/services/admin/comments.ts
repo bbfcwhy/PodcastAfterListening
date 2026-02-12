@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Comment } from "@/types/database";
+import { logger } from "@/lib/logger";
+import type { Comment } from "@/types/database";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type GetCommentsByStatusOptions = {
@@ -35,7 +36,7 @@ export async function getCommentsByStatus(
       .order("created_at", { ascending: false })
       .range(from, to);
     if (error) {
-      console.error("Error fetching comments by status:", error);
+      logger.error("Error fetching comments by status:", error);
       throw error;
     }
     return { items: data || [], total: count ?? 0 };
@@ -47,7 +48,7 @@ export async function getCommentsByStatus(
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
   if (error) {
-    console.error("Error fetching comments by status:", error);
+    logger.error("Error fetching comments by status:", error);
     throw error;
   }
   return data || [];
@@ -66,7 +67,7 @@ export async function updateCommentStatus(
     .single();
 
   if (error) {
-    console.error("Error updating comment status:", error);
+    logger.error("Error updating comment status:", error);
     throw error;
   }
 
@@ -80,7 +81,7 @@ export async function getCommentCounts() {
     .select("status");
 
   if (error) {
-    console.error("Error fetching comment counts:", error);
+    logger.error("Error fetching comment counts:", error);
     return {
       pending: 0,
       approved: 0,

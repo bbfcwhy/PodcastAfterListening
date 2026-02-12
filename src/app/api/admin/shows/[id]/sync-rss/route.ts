@@ -1,7 +1,9 @@
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { syncShowFromRss } from "@/lib/services/rss/sync";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 const RSS_SYNC_HEADER = "x-rss-sync-key";
 
@@ -73,7 +75,7 @@ export async function POST(
       ...(result.errors.length > 0 ? { errors: result.errors } : {}),
     });
   } catch (error) {
-    console.error("Error in POST /api/admin/shows/[id]/sync-rss:", error);
+    logger.error("Error in POST /api/admin/shows/[id]/sync-rss:", error);
     return NextResponse.json(
       { error: "Sync failed" },
       { status: 500 }

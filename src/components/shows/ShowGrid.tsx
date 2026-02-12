@@ -1,5 +1,5 @@
 import { ShowCard } from "./ShowCard";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { Podcast } from "lucide-react";
 
 interface ShowGridProps {

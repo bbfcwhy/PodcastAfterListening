@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Episode, Host, Show, Tag } from "@/types/database";
+import type { Episode, Host, Show, Tag } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export async function getLatestEpisodes(limit: number = 10): Promise<Episode[]> {
   const supabase = await createClient();
@@ -12,7 +13,7 @@ export async function getLatestEpisodes(limit: number = 10): Promise<Episode[]> 
     .limit(limit);
 
   if (error) {
-    console.error("Error fetching latest episodes:", error);
+    logger.error("Error fetching latest episodes:", error);
     throw error;
   }
 
@@ -30,7 +31,7 @@ export async function getEpisodesByShow(showId: string): Promise<Episode[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching episodes by show:", error);
+    logger.error("Error fetching episodes by show:", error);
     throw error;
   }
 

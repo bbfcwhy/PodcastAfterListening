@@ -3,8 +3,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/server";
 import { isAdmin } from "@/lib/auth/admin";
-import { Show } from "@/types/database";
+import type { Show } from "@/types/database";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
 
 export interface GetAdminShowsParams {
     page?: number;
@@ -75,7 +76,7 @@ export async function getAdminShows({
     const { data, count, error } = await query;
 
     if (error) {
-        console.error("Error fetching admin shows:", error);
+        logger.error("Error fetching admin shows:", error);
         throw new Error("Failed to fetch shows");
     }
 
@@ -112,14 +113,14 @@ export async function updateShowOrder(
     const results = await Promise.all(updates);
 
     // Log success/failure details
-    const successfulUpdates = results.filter(r => r.data && r.data.length > 0);
-    const failedUpdates = results.filter(r => r.error || !r.data || r.data.length === 0);
+    const _successfulUpdates = results.filter(r => r.data && r.data.length > 0);
+    const _failedUpdates = results.filter(r => r.error || !r.data || r.data.length === 0);
 
 
 
     const hasError = results.some((r) => r.error);
     if (hasError) {
-        console.error("Error updating show order:", results.filter(r => r.error).map(r => r.error));
+        logger.error("Error updating show order:", results.filter(r => r.error).map(r => r.error));
         throw new Error("Failed to update show order");
     }
 
@@ -135,7 +136,7 @@ export async function getShowCategories(): Promise<string[]> {
         .select("show_categories");
 
     if (error) {
-        console.error("Error fetching categories (Full Details):", JSON.stringify(error, null, 2));
+        logger.error("Error fetching categories (Full Details):", JSON.stringify(error, null, 2));
         return [];
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { Check, Eye, Ban } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -33,7 +34,7 @@ export function CommentActions({
         throw new Error("更新失敗");
       }
     } catch (error) {
-      console.error("Error updating comment status:", error);
+      logger.error("Error updating comment status:", error);
       toast.error("更新留言狀態失敗");
     }
   };

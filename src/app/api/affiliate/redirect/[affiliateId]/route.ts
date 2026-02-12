@@ -1,6 +1,8 @@
 import { getAffiliateById, recordClick } from "@/lib/services/affiliates";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
@@ -38,7 +40,7 @@ export async function GET(
     // Redirect to target URL
     return NextResponse.redirect(affiliate.target_url);
   } catch (error) {
-    console.error("Error in affiliate redirect:", error);
+    logger.error("Error in affiliate redirect:", error);
     return NextResponse.json(
       { error: "Failed to process redirect" },
       { status: 500 }

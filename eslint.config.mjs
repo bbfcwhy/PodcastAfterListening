@@ -37,6 +37,17 @@ export default tseslint.config(
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      // Prevent console.log in production code
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      // Require explicit return types for functions (with exceptions)
+      "@typescript-eslint/explicit-function-return-type": ["off"],
+      // Ban explicit any
+      "@typescript-eslint/no-explicit-any": "error",
+      // Encourage consistent type imports
+      "@typescript-eslint/consistent-type-imports": ["warn", {
+        prefer: "type-imports",
+        fixStyle: "separate-type-imports",
+      }],
     },
   }
 );

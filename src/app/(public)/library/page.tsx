@@ -1,9 +1,10 @@
 import { getCurrentUser } from "@/lib/auth/server";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { LibraryList } from "@/components/library/LibraryList";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { redirect } from "next/navigation";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "我的收藏庫 - Podcast 聽了以後",
@@ -28,7 +29,7 @@ export default async function LibraryPage() {
         .order("added_at", { ascending: false });
 
     if (error) {
-        console.error("Error fetching library items:", error);
+        logger.error("Error fetching library items:", error);
         // Handle error gracefully or throw
     }
 

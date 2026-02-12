@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { logger } from "@/lib/logger";
+import type {
+    DragEndEvent} from "@dnd-kit/core";
 import {
     DndContext,
     closestCenter,
     KeyboardSensor,
     PointerSensor,
     useSensor,
-    useSensors,
-    DragEndEvent,
+    useSensors
 } from "@dnd-kit/core";
 import {
     arrayMove,
@@ -18,7 +20,7 @@ import {
     useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Show, LibraryItem } from "@/types/database";
+import type { Show, LibraryItem } from "@/types/database";
 import { updateLibraryOrder } from "@/lib/library/actions";
 import Link from "next/link";
 import { GripVertical } from "lucide-react";
@@ -122,7 +124,7 @@ export function LibraryList({ items: initialItems }: LibraryListProps) {
 
                 // Call server action
                 updateLibraryOrder(updates).catch((err) => {
-                    console.error("Failed to update order", err);
+                    logger.error("Failed to update order", err);
                     // Ideally revert optimistic update here
                 });
 

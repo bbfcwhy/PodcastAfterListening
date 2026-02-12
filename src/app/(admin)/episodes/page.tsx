@@ -2,7 +2,7 @@ import { getAllEpisodes, getAllShows } from "@/lib/services/admin/episodes";
 import { EpisodeTable } from "@/components/admin/EpisodeTable";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
-import { Episode } from "@/types/database";
+import type { Episode } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";

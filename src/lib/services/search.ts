@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { Episode } from "@/types/database";
+import type { Episode } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export interface SearchFilters {
   query?: string;
@@ -27,7 +28,7 @@ export async function searchEpisodes(
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error searching episodes:", error);
+    logger.error("Error searching episodes:", error);
     // Fallback to basic search if function doesn't exist
     return await basicSearch(filters, limit, offset);
   }
@@ -72,7 +73,7 @@ async function basicSearch(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error in basic search:", error);
+    logger.error("Error in basic search:", error);
     return [];
   }
 

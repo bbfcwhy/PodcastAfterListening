@@ -3,7 +3,7 @@
 import { CommentItem } from "./CommentItem";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Comment } from "@/types/database";
+import type { Comment } from "@/types/database";
 
 interface CommentWithUser extends Comment {
   user?: {

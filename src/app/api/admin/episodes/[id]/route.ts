@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import {
   deleteEpisode,
   getEpisodeById,
   updateEpisode,
 } from "@/lib/services/admin/episodes";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
@@ -107,7 +109,7 @@ export async function PATCH(
     const data = await updateEpisode(id, updateData);
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error in PATCH /api/admin/episodes/[id]:", error);
+    logger.error("Error in PATCH /api/admin/episodes/[id]:", error);
     return NextResponse.json(
       { error: "Failed to update episode" },
       { status: 500 }
@@ -124,7 +126,7 @@ export async function DELETE(
     await deleteEpisode(id);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting episode:", error);
+    logger.error("Error deleting episode:", error);
     return NextResponse.json(
       { error: "Failed to delete episode" },
       { status: 500 }

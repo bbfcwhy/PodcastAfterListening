@@ -19,7 +19,7 @@ export default async function AdminShowsPage({
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
   const perPage = parseInt(params.perPage ?? "10", 10) || 10;
-  const sort = (params.sort as any) || "custom";
+  const sort = (params.sort as "custom" | "created_asc" | "created_desc" | "name_asc" | "name_desc") || "custom";
   const filter = params.search;
   const category = params.category;
 

@@ -3,10 +3,12 @@
  * Placeholder for future analytics integration (e.g., Google Analytics, Plausible)
  */
 
+import { logger } from "@/lib/logger";
+
 export function trackPageView(path: string) {
   if (typeof window !== "undefined") {
     // Placeholder for analytics tracking
-    console.log("Page view:", path);
+    logger.debug("Page view:", path);
     // Example: gtag('config', 'GA_MEASUREMENT_ID', { page_path: path });
   }
 }
@@ -14,7 +16,7 @@ export function trackPageView(path: string) {
 export function trackEvent(eventName: string, eventData?: Record<string, unknown>) {
   if (typeof window !== "undefined") {
     // Placeholder for event tracking
-    console.log("Event:", eventName, eventData);
+    logger.debug("Event:", eventName, eventData);
     // Example: gtag('event', eventName, eventData);
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition, useState } from "react";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { addToLibrary, removeFromLibrary } from "@/lib/library/actions";
 import { Plus, Check, Loader2 } from "lucide-react";
@@ -28,7 +29,7 @@ export function AddToLibraryButton({ showId, initialIsAdded, className }: AddToL
                 }
             } catch (error) {
                 // Simple error handling, could be improved with toast
-                console.error("Library action failed", error);
+                logger.error("Library action failed", error);
                 // Revert state if needed, or rely on server revalidation
             }
         });

@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { getCommentsByEpisode, createComment } from "@/lib/services/comments";
 import { checkSpam } from "@/lib/spam-filter";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitStore = new Map<
@@ -53,7 +55,7 @@ export async function GET(
 
     return NextResponse.json({ comments: commentsWithUsers });
   } catch (error) {
-    console.error("Error fetching comments:", error);
+    logger.error("Error fetching comments:", error);
     return NextResponse.json(
       { error: "Failed to fetch comments" },
       { status: 500 }
@@ -111,7 +113,7 @@ export async function POST(
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {
-    console.error("Error creating comment:", error);
+    logger.error("Error creating comment:", error);
     return NextResponse.json(
       { error: "Failed to create comment" },
       { status: 500 }

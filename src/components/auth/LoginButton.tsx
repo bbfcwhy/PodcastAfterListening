@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import { signIn } from "@/lib/auth/client";
 import type { AuthProvider } from "@/lib/auth/client";
 import { useState } from "react";
@@ -23,7 +24,7 @@ export function LoginButton({
     try {
       await signIn(provider, redirectTo);
     } catch (error) {
-      console.error("Sign in error:", error);
+      logger.error("Sign in error:", error);
       setLoading(false);
     }
   };

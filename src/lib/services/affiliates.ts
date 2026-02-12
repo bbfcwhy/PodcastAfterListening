@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { AffiliateContent } from "@/types/database";
+import type { AffiliateContent } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export async function getAffiliatesByEpisode(
   episodeId: string
@@ -13,7 +14,7 @@ export async function getAffiliatesByEpisode(
     .order("position", { ascending: true });
 
   if (error) {
-    console.error("Error fetching affiliates by episode:", error);
+    logger.error("Error fetching affiliates by episode:", error);
     throw error;
   }
 
@@ -45,7 +46,7 @@ export async function recordClick(
     .single();
 
   if (error) {
-    console.error("Error recording affiliate click:", error);
+    logger.error("Error recording affiliate click:", error);
     throw error;
   }
 
@@ -67,7 +68,7 @@ export async function getAffiliateById(
     if (error.code === "PGRST116") {
       return null;
     }
-    console.error("Error fetching affiliate by id:", error);
+    logger.error("Error fetching affiliate by id:", error);
     throw error;
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -50,7 +51,7 @@ export function CommentForm({ episodeId, onCommentAdded }: CommentFormProps) {
       setContent("");
       onCommentAdded?.();
     } catch (error) {
-      console.error("Error submitting comment:", error);
+      logger.error("Error submitting comment:", error);
       toast.error(
         error instanceof Error ? error.message : "留言發布失敗，請稍後再試"
       );
