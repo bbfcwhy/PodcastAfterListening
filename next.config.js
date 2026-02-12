@@ -25,7 +25,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "i1.sndcdn.com",
+        hostname: "*.sndcdn.com",
       },
     ],
   },
