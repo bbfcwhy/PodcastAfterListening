@@ -1,0 +1,1402 @@
+{
+  "name": "PAL_巡邏",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        -160
+      ],
+      "id": "b27d4c3f-eb8a-45b0-b0f7-e783b315ee0d",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "41efe486-1d1f-4b63-a640-2fd6b9c52e3c",
+              "leftValue": "={{ $json.enabled }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1136,
+        -160
+      ],
+      "id": "dcacf1cd-3e0e-46db-80c4-6a4472931ed7",
+      "name": "If enabled is TRUE"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -912,
+        -160
+      ],
+      "id": "b1df56fc-4c9d-4a29-a856-147daa2e6d26",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Loop Over Items').first().json.rss_feed_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -304
+      ],
+      "id": "6916d8ee-9250-4da2-87e3-f95b773a15c3",
+      "name": "讀取 feed_url"
+    },
+    {
+      "parameters": {
+        "jsCode": "// input: items from RSS Read (each item is an episode)\n\n// 台北時間 yyyy-MM-dd, HH:mm:ss\nfunction nowTaipei() {\n  return new Intl.DateTimeFormat('sv-SE', {\n    timeZone: 'Asia/Taipei',\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hour12: false,\n  }).format(new Date()).replace(' ', ', ');\n}\n\nconst now = nowTaipei();\nconst finalSlugs = new Set(); // 用來記錄這一批次最終決定的 slug\n\nfunction pick(obj, paths) {\n  for (const p of paths) {\n    const parts = p.split('.');\n    let cur = obj;\n    let ok = true;\n    for (const part of parts) {\n      if (cur && Object.prototype.hasOwnProperty.call(cur, part)) {\n        cur = cur[part];\n      } else {\n        ok = false;\n        break;\n      }\n    }\n    if (ok && cur) return cur;\n  }\n  return '';\n}\n\nreturn items.map((item) => {\n  const ep = item.json;\n\n  // 1. GUID / ID\n  const guid =\n    pick(ep, ['guid', 'id', 'link']) ||\n    pick(ep, ['enclosure.url']) ||\n    '';\n\n  // 2. 音檔連結\n  const enclosureUrl = pick(ep, [\n    'enclosure.url',\n    'enclosure',\n    'enclosureUrl',\n    'url',\n  ]);\n\n  // 3. 原始連結\n  const originalUrl = ep.link || '';\n\n  // 4. 解析 Duration\n  let durationSeconds = 0;\n  const rawDuration = (ep.itunes && ep.itunes.duration) || \n                      ep['itunes:duration'] || \n                      ep.duration || '';\n\n  if (rawDuration) {\n    if (typeof rawDuration === 'string' && rawDuration.includes(':')) {\n      const parts = rawDuration.split(':').map(Number);\n      if (parts.length === 3) {\n        durationSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];\n      } else if (parts.length === 2) {\n        durationSeconds = parts[0] * 60 + parts[1];\n      }\n    } else {\n      durationSeconds = parseInt(rawDuration, 10) || 0;\n    }\n  }\n\n  // 5. 生成 Slug\n  const title = ep.title || '';\n  let baseSlug = title\n    .toLowerCase()\n    .replace(/[^\\w\\s\\u4e00-\\u9fff-]/g, '')\n    .replace(/\\s+/g, '-')\n    .replace(/-+/g, '-')\n    .substring(0, 100);\n\n  // --- 自動編號邏輯 ---\n  let candidateSlug = baseSlug;\n  let counter = 1;\n  \n  // 如果這個 slug 已經在這次的集合裡了，就加後綴測試直到不重複\n  while (finalSlugs.has(candidateSlug)) {\n      candidateSlug = `${baseSlug}_${counter}`;\n      counter++;\n  }\n  \n  // 決定好 slug 後，記錄下來\n  finalSlugs.add(candidateSlug);\n  // ------------------\n\n  // 6. 描述\n  const description = \n    ep.contentSnippet || \n    (ep.itunes && ep.itunes.summary) || \n    ep.content || \n    ep['content:encoded'] || \n    '';\n\n  return {\n    json: {\n      show_id: $('Loop Over Items').first().json.podcast_id,\n      episode_id: guid,\n      title: title,\n      slug: candidateSlug, // 使用處理過的獨立 slug\n      description: description,\n      published_at: ep.isoDate || ep.pubDate || '',\n      original_url: originalUrl,\n      audio_file_url: enclosureUrl || '',\n      duration_seconds: durationSeconds,\n      status: 'new',\n      transcript: '',\n      ai_summary: '',\n      ai_sponsorship: '',\n      reflection: '',\n      drive_audio_file_id: '',\n      srt_file_id: '',       \n      created_at: now,\n      updated_at: now,\n    },\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -304
+      ],
+      "id": "b8077476-f474-4f03-baf7-e2dbb6d2bec5",
+      "name": "把 RSS item 變成 Episodes 欄位"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7d61519b-1e58-412c-99d1-b9d47c526176",
+              "leftValue": "={{ $json.episode_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "474d3974-608f-4da6-a93c-1652609181a5",
+              "leftValue": "={{ $json.audio_file_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        -304
+      ],
+      "id": "2097f6fb-47e8-40b2-878c-c84df97f3453",
+      "name": "檢查 guid 與 enclosure_url 不能空"
+    },
+    {
+      "parameters": {
+        "jsCode": "// A8 returns rows from Episodes (may be empty).\n// We output exactly ONE item with existingGuids array.\n\nconst guids = items\n  .map(i => i.json.episode_id)\n  .filter(Boolean);\n\nreturn [{ json: { existingGuids: guids } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        -304
+      ],
+      "id": "5f045dd4-ed7e-4f5f-b8bf-dd4a0aaab8bb",
+      "name": "整理出 existingGuids"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ",
+          "mode": "list",
+          "cachedResultName": "Podcast After Listening",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 596927649,
+          "mode": "list",
+          "cachedResultName": "Episodes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit#gid=596927649"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "show_slug",
+              "lookupValue": "={{ $json.show_slug }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        -304
+      ],
+      "id": "e50dd8cb-8d64-491c-81a6-709041b3be92",
+      "name": "讀取過去的 episode_guid",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NEWulJDQZndHkBdg",
+          "name": "lazzymerlin@gmail.com - Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ",
+          "mode": "list",
+          "cachedResultName": "Podcast After Listening",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Subscriptions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "enabled",
+              "lookupValue": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1360,
+        -160
+      ],
+      "id": "8d7cbb10-9e2f-46dd-a1e5-f1f332121d6b",
+      "name": "讀取節目 RSS Feed",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NEWulJDQZndHkBdg",
+          "name": "lazzymerlin@gmail.com - Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "/* input: items from RSS Read (each item is an episode) */\n\n// 1. 取得已存在的清單 (Set 查詢快)\n// 維持您的變數名稱 existingGuids，若來源節點有 output 其他名稱也可在此擴充\nconst existingGuids =\n  $items(\"整理出 existingGuids\")?.[0]?.json?.existingGuids || [];\n\nconst existing = new Set(\n  existingGuids.map(g => String(g).trim())\n);\n\n// 2. 安全取得 ID (優先找新欄位 episode_id，相容舊欄位 episode_guid)\nfunction getId(j) {\n  return String(j?.episode_id || j?.episode_guid || \"\").trim();\n}\n\n// 3. 只保留「還沒寫入過」的 Episodes\nconst newEpisodes = items.filter(item => {\n  const id = getId(item.json);\n  \n  // 如果這一集根本沒有 ID，就略過不處理 (但也許可以 log 警告)\n  if (!id) return false;\n  \n  // 如果已經存在清單中，就過濾掉\n  return !existing.has(id);\n});\n\n// 4. 輸出給下一個節點 (Append Episodes)\nreturn newEpisodes.map(e => ({ json: e.json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -304
+      ],
+      "id": "28d440ee-c256-4331-90fc-70d23b179e4b",
+      "name": "比對出有哪些需要寫入 Episodes",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d5b0ae55-c86a-45c9-ad99-0cb5650c9798",
+              "leftValue": "={{ ($json.episode_id || '').trim().length > 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        -304
+      ],
+      "id": "7c9960bd-a2ad-4fcf-9a71-48844260b2bc",
+      "name": "items > 0 才 append"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ",
+          "mode": "list",
+          "cachedResultName": "Podcast After Listening",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 596927649,
+          "mode": "list",
+          "cachedResultName": "Episodes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit#gid=596927649"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $json.status }}",
+            "drive_audio_file_id": "=",
+            "created_at": "={{ $json.created_at }}",
+            "updated_at": "={{ $json.updated_at }}",
+            "episode_id": "={{ $json.episode_id }}",
+            "title": "={{ $json.title }}",
+            "slug": "={{ $json.slug }}",
+            "description": "={{ $json.description }}",
+            "published_at": "={{ $json.published_at }}",
+            "original_url": "={{ $json.original_url }}",
+            "audio_file_url": "={{ $json.audio_file_url }}",
+            "duration_seconds": "={{ $json.duration_seconds }}",
+            "show_slug": "={{ $('Loop Over Items').first().json.show_slug }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "show_slug",
+              "displayName": "show_slug",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "episode_id",
+              "displayName": "episode_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "displayName": "slug",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "published_at",
+              "displayName": "published_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_url",
+              "displayName": "original_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "audio_file_url",
+              "displayName": "audio_file_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "drive_audio_file_id",
+              "displayName": "drive_audio_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "srt_file_id",
+              "displayName": "srt_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_sponsorship",
+              "displayName": "ai_sponsorship",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reflection",
+              "displayName": "reflection",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        880,
+        -304
+      ],
+      "id": "9aa76029-cd5b-4d9e-9948-276daae2ba98",
+      "name": "寫入 Episodes",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NEWulJDQZndHkBdg",
+          "name": "lazzymerlin@gmail.com - Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ",
+          "mode": "list",
+          "cachedResultName": "Podcast After Listening",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Subscriptions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "show_slug",
+              "lookupValue": "={{ $json.show_slug }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        -496
+      ],
+      "id": "7a2bb0db-dfd1-4a75-817f-bfd66f488a79",
+      "name": "讀取 Google Sheet 上的節目資訊",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NEWulJDQZndHkBdg",
+          "name": "lazzymerlin@gmail.com - Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9c5a81a9-60d6-43a1-a90f-f8e4f9d10ccf",
+              "leftValue": "={{ $json.author }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "ce5c079c-4fc4-4329-9010-d07249626ee7",
+              "leftValue": "={{ $json.show_description }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "097097ae-2d60-47de-a18d-a283244f982b",
+              "leftValue": "={{ $json.show_tags }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "079f3aec-f851-4498-a13a-b54a7f581e16",
+              "leftValue": "={{ $json.original_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c23f41e9-c01f-4d4e-b0a1-c295855a0593",
+              "leftValue": "={{ $json.cover_image_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -464,
+        -496
+      ],
+      "id": "f1c0a7b4-46a6-4b17-890d-abe262a6e2e8",
+      "name": "If - 確認是否有空白資訊需要寫入"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -496
+      ],
+      "id": "c897bfa2-4080-4516-8825-01c87779dba6",
+      "name": "將 data 轉為 XML"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss_feed_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -240,
+        -496
+      ],
+      "id": "fed33740-a6fe-4592-8af4-8ff76beb2128",
+      "name": "用 RSS 抓取節目的 data"
+    },
+    {
+      "parameters": {
+        "jsCode": "/* input: items from [將 data 轉為 XML] */\n\n// 1. 抓取源頭 Sheet 資料 (為了拿 show_slug 和 rss_feed_url)\nconst sheetItems = $('If - 確認是否有空白資訊需要寫入').all();\n\nreturn items.map((item, index) => {\n  // 2. 取得對應的 Sheet 資料 (順序對應)\n  const sourceItem = sheetItems[index] ? sheetItems[index].json : {};\n\n  // 3. 取得 Channel 資訊\n  const rssJson = item.json;\n  const channel = rssJson.rss?.channel || \n                  rssJson.feed?.channel || \n                  rssJson.channel || \n                  {};\n\n  // 4. 解析圖片\n  const image = channel.image?.url || \n                channel['itunes:image']?.['$']?.href ||   \n                channel['itunes:image']?.['@_href'] ||    \n                channel['itunes:image']?.href ||          \n                '';\n\n  // 5. 解析分類\n  let tags = '';\n  if (channel['itunes:category']) {\n    const cats = Array.isArray(channel['itunes:category']) \n      ? channel['itunes:category'] \n      : [channel['itunes:category']];\n    \n    tags = cats\n      .map(c => c['@_text'] || c['$']?.text || c.text || '')\n      .filter(t => t)\n      .join(',');\n  }\n\n  // 6. 輸出 (這裡我們只回傳節目資訊，完全不管單集，這樣記憶體消耗極低！)\n  return {\n    json: {\n      // 保留 Sheet 原始欄位 (id, show_slug...)\n      ...sourceItem,\n      \n      // 更新 Metadata\n      name: channel.title || sourceItem.name, \n      author: channel['itunes:author'] || channel.author || '',\n      show_description: channel.description || channel['itunes:summary'] || '',\n      cover_image_url: image,\n      show_tags: tags,\n      original_url: channel.link || '',\n      \n      // 確保重要 Key 存在\n      rss_feed_url: sourceItem.rss_feed_url, \n      show_slug: sourceItem.show_slug || '', \n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -496
+      ],
+      "id": "168ad6de-51ff-4761-90cc-623dbce7b4fa",
+      "name": "整理節目資訊"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ",
+          "mode": "list",
+          "cachedResultName": "Podcast After Listening",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Subscriptions",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MXkBgXf3IhsUTNthxzTeJafrDwszE5X01ZmZiDl74aQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "author": "={{ $json.author }}",
+            "show_description": "={{ $json.show_description }}",
+            "cover_image_url": "={{ $json.cover_image_url }}",
+            "show_tags": "={{ $json.show_tags }}",
+            "original_url": "={{ $json.original_url }}",
+            "show_slug": "={{ $json.show_slug }}"
+          },
+          "matchingColumns": [
+            "show_slug"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "show_slug",
+              "displayName": "show_slug",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "rss_feed_url",
+              "displayName": "rss_feed_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "enabled",
+              "displayName": "enabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "show_description",
+              "displayName": "show_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cover_image_url",
+              "displayName": "cover_image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "show_tags",
+              "displayName": "show_tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "original_url",
+              "displayName": "original_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "drive_audio_tmp_folder_id",
+              "displayName": "drive_audio_tmp_folder_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "drive_srt_folder_id",
+              "displayName": "drive_srt_folder_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        -496
+      ],
+      "id": "a9a7cc6a-db18-4eba-8133-ec52b22f66a0",
+      "name": "更新回 Google sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "NEWulJDQZndHkBdg",
+          "name": "lazzymerlin@gmail.com - Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "shows",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('整理節目資訊').item.json.name }}"
+            },
+            {
+              "fieldId": "slug",
+              "fieldValue": "={{ $('整理節目資訊').item.json.show_slug }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $('整理節目資訊').item.json.show_description }}"
+            },
+            {
+              "fieldId": "cover_image_url",
+              "fieldValue": "={{ $('整理節目資訊').item.json.cover_image_url }}"
+            },
+            {
+              "fieldId": "original_url",
+              "fieldValue": "={{ $('整理節目資訊').item.json.original_url }}"
+            },
+            {
+              "fieldId": "tags",
+              "fieldValue": "={{ ($('整理節目資訊').item.json.show_tags || '').split(',') }}"
+            },
+            {
+              "fieldId": "rss_feed_url",
+              "fieldValue": "={{ $('整理節目資訊').item.json.rss_feed_url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -496
+      ],
+      "id": "82821c14-1892-4e04-bf84-477164b9f3be",
+      "name": "將節目資訊寫入 Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XcQ86gTE8CI7Mb0f",
+          "name": "Supabase PAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "episodes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "slug",
+              "fieldValue": "={{ $json.slug }}"
+            },
+            {
+              "fieldId": "published_at",
+              "fieldValue": "={{ $json.published_at }}"
+            },
+            {
+              "fieldId": "duration_seconds",
+              "fieldValue": "={{ $json.duration_seconds }}"
+            },
+            {
+              "fieldId": "original_url",
+              "fieldValue": "={{ $json.original_url }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $json.description }}"
+            },
+            {
+              "fieldId": "episode_id",
+              "fieldValue": "={{ $json.episode_id }}"
+            },
+            {
+              "fieldId": "audio_file_url",
+              "fieldValue": "={{ $json.audio_file_url }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.created_at }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ $json.updated_at }}"
+            },
+            {
+              "fieldId": "is_published",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "show_slug",
+              "fieldValue": "={{ $json.show_slug }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        -160
+      ],
+      "id": "32ea1aae-dc4d-4288-b0b8-74ee2b7a4e56",
+      "name": "將單集資訊寫入 Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XcQ86gTE8CI7Mb0f",
+          "name": "Supabase PAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "podcast_episodes",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "show_slug",
+              "condition": "eq",
+              "keyValue": "={{ $json.show_slug }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -304
+      ],
+      "id": "4be65d7d-4fb7-4090-9316-ec3a74ad7cd1",
+      "name": "讀取 Supabase 已經存過的集數",
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "XcQ86gTE8CI7Mb0f",
+          "name": "Supabase PAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. 取得 Supabase 中已經存在的資料 (來自當前輸入 \"Get many rows\")\n// 使用 Set 來儲存已存在的 ID，比對速度會很快\nconst existingIds = new Set($input.all().map(item => item.json.episode_id));\n\n// 2. 取得原本想寫入的新資料 (來自 \"寫入Episodes\" 節點)\n// 注意：請確認節點名稱是否完全正確，大小寫也要一致\nconst newItems = $('寫入 Episodes').all();\n\n// 3. 過濾資料：只保留那些 ID 不在 Supabase 裡面的項目\nconst itemsToInsert = newItems.filter(item => {\n  const idToCheck = item.json.episode_id;\n  \n  // 如果 Set 裡面沒有這個 ID，表示是新資料，要保留 (return true)\n  // 如果 Set 裡面有，表示已經存在，要過濾掉 (return false)\n  return !existingIds.has(idToCheck);\n});\n\n// 4. 回傳真正需要寫入的資料\nreturn itemsToInsert;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        -304
+      ],
+      "id": "1216b152-8f79-4cf8-bae8-5c5730fc4cc4",
+      "name": "比對是否需要寫入",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "shows",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "slug",
+              "keyValue": "={{ $json.show_slug }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -496
+      ],
+      "id": "556a0199-85c5-4a44-9ee9-9cf08775478a",
+      "name": "確認 Supabase 是否已經有這個節目",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "XcQ86gTE8CI7Mb0f",
+          "name": "Supabase PAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b31e12d2-d45e-4005-b67d-a110ed46622c",
+              "leftValue": "={{ $json.slug }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        -496
+      ],
+      "id": "70d4a6cd-39ea-415e-93d6-1251f1b66546",
+      "name": "If - 如果節目不存在"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "66c81384-2eaa-44bf-9784-9d71681cf6c9",
+              "leftValue": "={{ $json.episode_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1552,
+        -232
+      ],
+      "id": "0b8f7db9-d08f-4fdf-961c-147e468c11fa",
+      "name": "If - 如果需要寫入的單集存在"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "讀取節目 RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If enabled is TRUE": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "讀取 Google Sheet 上的節目資訊",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "讀取過去的 episode_guid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取 feed_url": {
+      "main": [
+        [
+          {
+            "node": "把 RSS item 變成 Episodes 欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "把 RSS item 變成 Episodes 欄位": {
+      "main": [
+        [
+          {
+            "node": "檢查 guid 與 enclosure_url 不能空",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "檢查 guid 與 enclosure_url 不能空": {
+      "main": [
+        [
+          {
+            "node": "比對出有哪些需要寫入 Episodes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理出 existingGuids": {
+      "main": [
+        [
+          {
+            "node": "讀取 feed_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取過去的 episode_guid": {
+      "main": [
+        [
+          {
+            "node": "整理出 existingGuids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取節目 RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "If enabled is TRUE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "比對出有哪些需要寫入 Episodes": {
+      "main": [
+        [
+          {
+            "node": "items > 0 才 append",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "items > 0 才 append": {
+      "main": [
+        [
+          {
+            "node": "寫入 Episodes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "寫入 Episodes": {
+      "main": [
+        [
+          {
+            "node": "讀取 Supabase 已經存過的集數",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取 Google Sheet 上的節目資訊": {
+      "main": [
+        [
+          {
+            "node": "If - 確認是否有空白資訊需要寫入",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If - 確認是否有空白資訊需要寫入": {
+      "main": [
+        [
+          {
+            "node": "用 RSS 抓取節目的 data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "將 data 轉為 XML": {
+      "main": [
+        [
+          {
+            "node": "整理節目資訊",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "用 RSS 抓取節目的 data": {
+      "main": [
+        [
+          {
+            "node": "將 data 轉為 XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理節目資訊": {
+      "main": [
+        [
+          {
+            "node": "更新回 Google sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "更新回 Google sheet": {
+      "main": [
+        [
+          {
+            "node": "確認 Supabase 是否已經有這個節目",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "將單集資訊寫入 Supabase": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "將節目資訊寫入 Supabase": {
+      "main": [
+        []
+      ]
+    },
+    "讀取 Supabase 已經存過的集數": {
+      "main": [
+        [
+          {
+            "node": "比對是否需要寫入",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "比對是否需要寫入": {
+      "main": [
+        [
+          {
+            "node": "If - 如果需要寫入的單集存在",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "確認 Supabase 是否已經有這個節目": {
+      "main": [
+        [
+          {
+            "node": "If - 如果節目不存在",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If - 如果節目不存在": {
+      "main": [
+        [
+          {
+            "node": "將節目資訊寫入 Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If - 如果需要寫入的單集存在": {
+      "main": [
+        [
+          {
+            "node": "將單集資訊寫入 Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "91b06c46-8ec0-4d6c-8d97-d450483a5647",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fb2559b35dcac28b92fdaecdf120fdaadd3d6c346b53c5bd28e272a743fd09ce"
+  },
+  "id": "kZ0uabfHHHT4983D",
+  "tags": []
+}

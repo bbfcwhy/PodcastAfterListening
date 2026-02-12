@@ -16,7 +16,7 @@ export async function searchEpisodes(
 ): Promise<Episode[]> {
   const supabase = await createClient();
 
-  let query = supabase.rpc("search_episodes", {
+  const query = supabase.rpc("search_episodes", {
     query: filters.query || "",
     filter_show_id: filters.showId || null,
     filter_tags: filters.tags || [],
@@ -63,7 +63,7 @@ async function basicSearch(
   if (filters.query) {
     // Basic text search using ilike
     query = query.or(
-      `title.ilike.%${filters.query}%,ai_summary.ilike.%${filters.query}%,host_notes.ilike.%${filters.query}%`
+      `title.ilike.%${filters.query}%,ai_summary.ilike.%${filters.query}%,reflection.ilike.%${filters.query}%`
     );
   }
 

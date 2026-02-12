@@ -2,8 +2,8 @@ import { Info } from "lucide-react";
 
 export function AIDisclaimer() {
   return (
-    <div className="bg-surface-muted border border-border-subtle rounded-2xl px-6 py-4 flex items-center gap-4">
-      <div className="w-8 h-8 bg-info/10 rounded-xl flex items-center justify-center shrink-0">
+    <div className="bg-surface-muted border border-border-subtle rounded-[2.5rem] px-6 py-4 flex items-center gap-4">
+      <div className="w-8 h-8 bg-info/10 rounded-[1.2rem] flex items-center justify-center shrink-0">
         <Info className="text-info" size={16} />
       </div>
       <p className="text-[11px] md:text-xs text-text-secondary font-bold leading-relaxed">

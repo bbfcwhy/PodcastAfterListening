@@ -30,34 +30,34 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">管理儀表板</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-3xl font-bold text-text-primary">管理儀表板</h1>
+        <p className="text-text-secondary mt-2">
           歡迎回來！這裡是網站內容管理的總覽。
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-surface border-border-subtle">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">總節目數</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-text-primary">總節目數</CardTitle>
+            <FileText className="h-4 w-4 text-text-secondary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{episodeCount || 0}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-text-primary">{episodeCount || 0}</div>
+            <p className="text-xs text-text-secondary">
               已發布：{publishedCount || 0}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-surface border-border-subtle">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">總留言數</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-text-primary">總留言數</CardTitle>
+            <MessageSquare className="h-4 w-4 text-text-secondary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{commentCount || 0}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-text-primary">{commentCount || 0}</div>
+            <p className="text-xs text-text-secondary">
               待審核：{pendingCount || 0}
             </p>
           </CardContent>

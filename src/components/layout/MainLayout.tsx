@@ -1,17 +1,26 @@
 import Link from "next/link";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { getShows } from "@/lib/services/shows"; // Server-side fetch
 import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 import { SearchBar } from "@/components/search/SearchBar";
-import { AlertCircle, Sparkles, Podcast } from "lucide-react";
+import { UserMenu } from "@/components/navbar/UserMenu";
+import { getCurrentUser, getCurrentProfile } from "@/lib/auth/server";
+import { AlertCircle, Podcast } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
+export async function MainLayout({ children }: MainLayoutProps) {
+  // This is a Server Component, so it can safely call getShows() (which uses cookies())
+  const shows = await getShows();
+  const user = await getCurrentUser();
+  const profile = await getCurrentProfile();
+
   return (
     <div className="min-h-screen bg-canvas text-text-primary">
-      <Sidebar />
+      {/* Pass data to Client Component */}
+      <Sidebar shows={shows} />
 
       <main className="lg:ml-72 min-h-screen flex flex-col">
         <header className="sticky top-0 z-50 glass-header px-4 md:px-10 py-4 md:py-6 flex justify-between items-center gap-4">
@@ -38,9 +47,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               <AlertCircle size={18} /> FEEDBACK
             </a>
             <div className="h-6 w-px bg-border-subtle hidden sm:block" />
-            <div className="w-12 h-12 rounded-2xl bg-cta border-4 border-surface shadow-sm flex items-center justify-center shrink-0">
-              <Sparkles className="text-text-primary" size={20} />
-            </div>
+            <UserMenu user={user} profile={profile} />
           </div>
         </header>
 

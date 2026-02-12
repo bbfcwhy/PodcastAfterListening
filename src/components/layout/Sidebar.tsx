@@ -2,90 +2,141 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Podcast, Home, Search, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Show } from "@/types/database";
+import {
+  Library,
+  Clock,
+  LayoutGrid,
+  Hash
+} from "lucide-react";
 
-export function Sidebar() {
+interface SidebarProps {
+  shows: (Show & { episode_count?: number })[];
+  className?: string;
+}
+
+export function Sidebar({ shows, className }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 fixed left-0 top-0 h-screen bg-surface border-r border-border-subtle p-10 hidden lg:flex flex-col shadow-sm z-40">
-      <Link href="/" className="flex flex-col gap-4 mb-16">
-        <div className="w-14 h-14 bg-cta rounded-2xl flex items-center justify-center shadow-sm">
-          <Podcast className="text-text-primary" size={32} />
-        </div>
-        <div>
-          <h1 className="text-xl font-black tracking-tighter leading-none text-text-primary">
-            PODCAST <span className="text-cta">聽了以後</span>
+    <aside className={cn(
+      "w-72 bg-surface border-r border-border-subtle h-screen fixed left-0 top-0 overflow-y-auto hidden lg:block",
+      className
+    )}>
+      <div className="p-6">
+        <Link href="/" className="block mb-8">
+          <h1 className="text-xl font-black tracking-tighter text-text-primary uppercase">
+            Podcast<br />
+            <span className="text-cta">After Listening</span>
           </h1>
-          <span className="text-[10px] font-bold text-cta/80 tracking-widest uppercase">
-            After Listening
-          </span>
-        </div>
-      </Link>
+        </Link>
 
-      <nav className="flex-1 space-y-10">
-        <div>
-          <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.3em] mb-6">
-            EXPLORE
-          </h3>
-          <ul className="space-y-2">
-            <li>
-              <Link
-                href="/"
-                className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-bold ${
-                  pathname === "/"
-                    ? "bg-selected text-text-primary"
-                    : "text-text-primary hover:text-cta hover:bg-hover"
-                }`}
-              >
-                <Home size={20} /> 探索集數
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/search"
-                className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-bold ${
-                  pathname.startsWith("/search")
-                    ? "bg-selected text-text-primary"
-                    : "text-text-primary hover:text-cta hover:bg-hover"
-                }`}
-              >
-                <Search size={20} /> 進階搜尋
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-[10px] font-black text-text-secondary uppercase tracking-[0.3em] mb-6">
-            CHANNELS
-          </h3>
-          <ul className="space-y-1">
-            <li>
-              <Link
-                href="/#節目系列"
-                className="flex items-center gap-3 px-5 py-2.5 text-sm font-bold transition-all text-text-primary hover:text-cta"
-              >
-                <span className="w-1 h-4 rounded-full bg-transparent" />
-                瀏覽節目系列
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
-      <div className="mt-auto pt-4">
-        <div className="p-6 rounded-[2rem] bg-surface-muted border border-border-subtle">
-          <div className="flex items-center gap-2 text-cta mb-3">
-            <Zap size={14} fill="currentColor" />
-            <span className="text-[10px] font-black uppercase tracking-wider">
-              Powered by AI
-            </span>
+        <nav className="space-y-8">
+          <div>
+            <div className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4 pl-3">
+              Menu
+            </div>
+            <ul className="space-y-1">
+              <li>
+                <Link
+                  href="/"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                    pathname === "/"
+                      ? "bg-selected text-text-primary"
+                      : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                  )}
+                >
+                  <LayoutGrid size={18} />
+                  <span>Discover</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/recent"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                    pathname === "/recent"
+                      ? "bg-selected text-text-primary"
+                      : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                  )}
+                >
+                  <Clock size={18} />
+                  <span>Recent</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/library"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                    pathname === "/library"
+                      ? "bg-selected text-text-primary"
+                      : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                  )}
+                >
+                  <Library size={18} />
+                  <span>Library</span>
+                </Link>
+              </li>
+            </ul>
           </div>
-          <p className="text-[11px] text-text-secondary leading-relaxed font-bold">
-            一人開發維護，內容由 AI 解析。若有錯誤請回報。
-          </p>
-        </div>
+
+          <div>
+            <div className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4 pl-3">
+              Channels
+            </div>
+            <ul className="space-y-1">
+              {shows.map((show) => (
+                <li key={show.id}>
+                  <Link
+                    href={`/shows/${show.slug}`}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                      pathname === `/shows/${show.slug}`
+                        ? "bg-selected text-text-primary"
+                        : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                    )}
+                  >
+                    <div className="w-5 h-5 rounded overflow-hidden shrink-0 bg-surface-highlight">
+                      {show.cover_image_url ? (
+                        <img
+                          src={show.cover_image_url}
+                          alt={show.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-cta/20 flex items-center justify-center text-[8px] font-black text-cta">
+                          {show.name.slice(0, 1)}
+                        </div>
+                      )}
+                    </div>
+                    <span className="truncate">{show.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4 pl-3">
+              Tags
+            </div>
+            <ul className="space-y-1">
+              {/* Categories can be dynamically loaded here later */}
+              <li>
+                <Link
+                  href="/tags/tech"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-text-secondary hover:text-text-primary hover:bg-hover transition-colors"
+                >
+                  <Hash size={18} />
+                  <span>Tech</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
       </div>
     </aside>
   );

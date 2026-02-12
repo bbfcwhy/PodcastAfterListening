@@ -18,7 +18,7 @@ interface SearchFiltersProps {
   tags: Tag[];
 }
 
-export function SearchFilters({ shows, tags }: SearchFiltersProps) {
+export function SearchFilters({ shows, tags: _tags }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

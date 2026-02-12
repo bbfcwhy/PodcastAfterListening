@@ -31,7 +31,7 @@ export function SearchBar({ initialQuery = "", className }: SearchBarProps) {
         placeholder="搜尋感興趣的內容..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full bg-surface border border-border-subtle rounded-[1.2rem] py-4 pl-14 pr-6 focus:ring-2 focus:ring-cta/20 outline-none text-sm transition-all shadow-sm placeholder:text-text-secondary text-text-primary"
+        className="w-full bg-surface border border-border-subtle rounded-[2.5rem] py-4 pl-14 pr-6 focus:ring-2 focus:ring-cta/20 outline-none text-sm transition-all shadow-sm placeholder:text-text-secondary text-text-primary"
       />
     </form>
   );

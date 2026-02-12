@@ -18,7 +18,7 @@ interface CommentListProps {
   episodeId: string;
 }
 
-export function CommentList({ comments, loading, episodeId }: CommentListProps) {
+export function CommentList({ comments, loading, episodeId: _episodeId }: CommentListProps) {
   if (loading) {
     return <LoadingSpinner />;
   }

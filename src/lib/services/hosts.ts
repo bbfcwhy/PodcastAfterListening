@@ -13,5 +13,5 @@ export async function getHostsByShow(showId: string): Promise<Host[]> {
     return [];
   }
 
-  return data?.map((item: any) => item.hosts).filter(Boolean) || [];
+  return data?.map((item: { hosts: Host | null }) => item.hosts).filter(Boolean) || [];
 }

@@ -5,6 +5,8 @@ node_modules/
 
 # Testing
 coverage/
+playwright-report/
+test-results/
 *.log
 
 # Next.js
@@ -64,3 +66,6 @@ next-env.d.ts
 
 # Turbo
 .turbo
+
+# UI Reference (not needed in repo)
+ui_reference/

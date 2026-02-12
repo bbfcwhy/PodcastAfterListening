@@ -17,6 +17,11 @@ export interface Database {
           description: string | null;
           cover_image_url: string | null;
           original_url: string | null;
+          rss_feed_url: string | null;
+          hosting_provided_by: string | null;
+          show_categories: string[] | null;
+          tags: string[] | null; // New field
+          position: number;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +32,11 @@ export interface Database {
           description?: string | null;
           cover_image_url?: string | null;
           original_url?: string | null;
+          rss_feed_url?: string | null;
+          hosting_provided_by?: string | null;
+          show_categories?: string[] | null;
+          tags?: string[] | null; // New field
+          position?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -37,6 +47,11 @@ export interface Database {
           description?: string | null;
           cover_image_url?: string | null;
           original_url?: string | null;
+          rss_feed_url?: string | null;
+          hosting_provided_by?: string | null;
+          show_categories?: string[] | null;
+          tags?: string[] | null; // New field
+          position?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -90,47 +105,69 @@ export interface Database {
           show_id: string;
           title: string;
           slug: string;
+          description: string | null;
           published_at: string | null;
           original_url: string;
           ai_summary: string | null;
           ai_sponsorship: string | null;
-          host_notes: string | null;
           duration_seconds: number | null;
           is_published: boolean;
           created_at: string;
           updated_at: string;
+          episode_id: string | null;
+          audio_file_url: string | null;
+          srt_file_url: string | null;
+          reflection: string | null;
+          processed_at: string | null;
+          transcript: string | null;
+          show_slug: string | null;
         };
         Insert: {
           id?: string;
           show_id: string;
           title: string;
           slug: string;
+          description?: string | null;
           published_at?: string | null;
           original_url: string;
           ai_summary?: string | null;
           ai_sponsorship?: string | null;
-          host_notes?: string | null;
           duration_seconds?: number | null;
           is_published?: boolean;
           created_at?: string;
           updated_at?: string;
+          episode_id?: string | null;
+          audio_file_url?: string | null;
+          srt_file_url?: string | null;
+          reflection?: string | null;
+          processed_at?: string | null;
+          transcript?: string | null;
+          show_slug?: string | null;
         };
         Update: {
           id?: string;
           show_id?: string;
           title?: string;
           slug?: string;
+          description?: string | null;
           published_at?: string | null;
           original_url?: string;
           ai_summary?: string | null;
           ai_sponsorship?: string | null;
-          host_notes?: string | null;
           duration_seconds?: number | null;
           is_published?: boolean;
           created_at?: string;
           updated_at?: string;
+          episode_id?: string | null;
+          audio_file_url?: string | null;
+          srt_file_url?: string | null;
+          reflection?: string | null;
+          processed_at?: string | null;
+          transcript?: string | null;
+          show_slug?: string | null;
         };
       };
+
       tags: {
         Row: {
           id: string;
@@ -223,6 +260,29 @@ export interface Database {
           updated_at?: string;
         };
       };
+      library_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          show_id: string;
+          position: number;
+          added_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          show_id: string;
+          position?: number;
+          added_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          show_id?: string;
+          position?: number;
+          added_at?: string;
+        };
+      };
       affiliate_contents: {
         Row: {
           id: string;
@@ -312,4 +372,5 @@ export type Episode = Database["public"]["Tables"]["episodes"]["Row"];
 export type Tag = Database["public"]["Tables"]["tags"]["Row"];
 export type Comment = Database["public"]["Tables"]["comments"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type LibraryItem = Database["public"]["Tables"]["library_items"]["Row"];
 export type AffiliateContent = Database["public"]["Tables"]["affiliate_contents"]["Row"];

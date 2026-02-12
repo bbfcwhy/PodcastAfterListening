@@ -47,10 +47,10 @@ export default async function HomePage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12 md:mb-16">
                 <div>
                   <h3 className="text-3xl md:text-4xl font-black text-text-primary mb-2 md:mb-4">
-                    最新百科收錄
+                    最新 Podcast 收錄
                   </h3>
                   <p className="text-text-secondary font-bold">
-                    每日自動彙整熱門集數，不漏掉任何細節。
+                    每日自動彙整最新集數，複習你聽過的 Podcast。
                   </p>
                 </div>
                 <Link
