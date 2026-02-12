@@ -6,6 +6,7 @@ import { EpisodeList } from "@/components/episodes/EpisodeList";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getShows } from "@/lib/services/shows";
 import { getLatestEpisodes } from "@/lib/services/episodes";
+import { formatEpisodeDate } from "@/lib/utils/date-formatter";
 import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -26,6 +27,12 @@ export default async function HomePage() {
     getShows(),
     getLatestEpisodes(12),
   ]);
+
+  // 預先格式化日期，避免 hydration mismatch
+  const episodesWithFormattedDates = episodes.map(ep => ({
+    ...ep,
+    formattedPublishedDate: formatEpisodeDate(ep.published_at)
+  }));
 
   const hasContent = shows.length > 0 || episodes.length > 0;
 
@@ -60,7 +67,7 @@ export default async function HomePage() {
                   查看全部 <ChevronRight size={14} />
                 </Link>
               </div>
-              <EpisodeList episodes={episodes} shows={shows} hideSectionTitle />
+              <EpisodeList episodes={episodesWithFormattedDates} shows={shows} hideSectionTitle />
             </section>
           )}
 

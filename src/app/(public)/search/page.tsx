@@ -5,6 +5,7 @@ import { SearchResults } from "@/components/search/SearchResults";
 import { searchEpisodes } from "@/lib/services/search";
 import { getShows } from "@/lib/services/shows";
 import { createClient } from "@/lib/supabase/server";
+import { formatEpisodeDate } from "@/lib/utils/date-formatter";
 
 interface SearchPageProps {
   searchParams: Promise<{
@@ -38,6 +39,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     toDate,
   });
 
+  // 預先格式化日期，避免 hydration mismatch
+  const episodesWithFormattedDates = episodes.map(ep => ({
+    ...ep,
+    formattedPublishedDate: formatEpisodeDate(ep.published_at)
+  }));
+
   return (
     <MainLayout>
       <div className="max-w-6xl mx-auto py-12 md:py-16 px-4 md:px-10">
@@ -58,7 +65,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </aside>
           {/* Main Results */}
           <main className="flex-1 min-w-0">
-            <SearchResults episodes={episodes} shows={shows} query={query} />
+            <SearchResults episodes={episodesWithFormattedDates} shows={shows} query={query} />
           </main>
         </div>
       </div>

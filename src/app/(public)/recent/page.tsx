@@ -3,6 +3,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { EpisodeList } from "@/components/episodes/EpisodeList";
 import { getLatestEpisodes } from "@/lib/services/episodes";
 import { getShows } from "@/lib/services/shows";
+import { formatEpisodeDate } from "@/lib/utils/date-formatter";
 import { Clock } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -18,6 +19,12 @@ export default async function RecentPage() {
         getLatestEpisodes(50),
         getShows(),
     ]);
+
+    // 預先格式化日期，避免 hydration mismatch
+    const episodesWithFormattedDates = episodes.map(ep => ({
+        ...ep,
+        formattedPublishedDate: formatEpisodeDate(ep.published_at)
+    }));
 
     return (
         <MainLayout>
@@ -36,7 +43,7 @@ export default async function RecentPage() {
                     </div>
                 </div>
 
-                <EpisodeList episodes={episodes} shows={shows} hideSectionTitle showLimitControl />
+                <EpisodeList episodes={episodesWithFormattedDates} shows={shows} hideSectionTitle showLimitControl />
             </div>
         </MainLayout>
     );

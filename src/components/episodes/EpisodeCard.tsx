@@ -1,19 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Episode, Show } from "@/types/database";
-import { format } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import { ChevronRight, Podcast, Play } from "lucide-react";
 
 interface EpisodeCardProps {
-  episode: Episode;
+  episode: Episode & { formattedPublishedDate?: string | null };
   show?: Show;
 }
 
 export function EpisodeCard({ episode, show }: EpisodeCardProps) {
-  const publishedDate = episode.published_at
-    ? format(new Date(episode.published_at), "yyyy年MM月dd日", { locale: zhTW })
-    : null;
+  // 使用預先格式化的日期，避免 hydration mismatch
+  const publishedDate = episode.formattedPublishedDate;
 
   return (
     <Link
