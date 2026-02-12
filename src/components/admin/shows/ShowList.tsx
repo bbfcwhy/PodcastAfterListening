@@ -18,7 +18,8 @@ import { zhTW } from "date-fns/locale";
 import Image from "next/image";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import type {
-    DragEndEvent} from "@dnd-kit/core";
+    DragEndEvent
+} from "@dnd-kit/core";
 import {
     DndContext,
     closestCenter,
@@ -44,6 +45,9 @@ interface ShowListProps {
     totalCount: number;
     page: number;
     perPage: number;
+    initialSort?: string;
+    initialFilter?: string;
+    initialCategory?: string;
 }
 
 function CoverImage({ src, alt }: { src: string | null; alt: string }) {
@@ -74,6 +78,9 @@ export function ShowList({
     totalCount,
     page,
     perPage,
+    initialSort = "custom",
+    initialFilter = "",
+    initialCategory = "all"
 }: ShowListProps) {
     const [items, setItems] = useState(initialShows);
     const searchParams = useSearchParams();
@@ -83,9 +90,9 @@ export function ShowList({
         setItems(initialShows);
     }, [initialShows]);
 
-    const sort = searchParams.get("sort") || "custom";
-    const filter = searchParams.get("search");
-    const category = searchParams.get("category");
+    const sort = initialSort;
+    const filter = initialFilter;
+    const category = initialCategory;
 
     // Draggable only if custom sort and no filters
     const isDraggable = sort === "custom" && !filter && (!category || category === "all");

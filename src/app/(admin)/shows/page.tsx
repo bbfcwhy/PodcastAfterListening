@@ -43,13 +43,22 @@ export default async function AdminShowsPage({
         </Button>
       </div>
 
-      <AdminShowToolbar categories={categories} />
+      <AdminShowToolbar
+        categories={categories}
+        initialSearch={filter || ""}
+        initialSort={sort}
+        initialPerPage={perPage.toString()}
+        initialCategory={category || "all"}
+      />
 
       <ShowList
         initialShows={shows}
         totalCount={count}
         page={page}
         perPage={perPage}
+        initialSort={sort}
+        initialFilter={filter || ""}
+        initialCategory={category || "all"}
       />
     </div>
   );

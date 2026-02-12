@@ -14,9 +14,19 @@ import { Search } from "lucide-react";
 
 interface AdminShowToolbarProps {
     categories?: string[];
+    initialSearch?: string;
+    initialSort?: string;
+    initialPerPage?: string;
+    initialCategory?: string;
 }
 
-export function AdminShowToolbar({ categories = [] }: AdminShowToolbarProps) {
+export function AdminShowToolbar({
+    categories = [],
+    initialSearch = "",
+    initialSort = "custom",
+    initialPerPage = "10",
+    initialCategory = "all"
+}: AdminShowToolbarProps) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -71,14 +81,14 @@ export function AdminShowToolbar({ categories = [] }: AdminShowToolbarProps) {
                     <Input
                         placeholder="搜尋節目名稱..."
                         className="pl-9"
-                        defaultValue={searchParams.get("search")?.toString()}
+                        defaultValue={initialSearch}
                         onChange={(e) => handleSearch(e.target.value)}
                     />
                 </div>
 
                 {categories.length > 0 && (
                     <Select
-                        defaultValue={searchParams.get("category")?.toString() || "all"}
+                        defaultValue={initialCategory}
                         onValueChange={(val) => handleFilterChange("category", val)}
                     >
                         <SelectTrigger className="w-[180px]">
@@ -98,7 +108,7 @@ export function AdminShowToolbar({ categories = [] }: AdminShowToolbarProps) {
 
             <div className="flex gap-4 w-full sm:w-auto">
                 <Select
-                    defaultValue={searchParams.get("sort")?.toString() || "custom"}
+                    defaultValue={initialSort}
                     onValueChange={handleSortChange}
                 >
                     <SelectTrigger className="w-[180px]">
@@ -114,7 +124,7 @@ export function AdminShowToolbar({ categories = [] }: AdminShowToolbarProps) {
                 </Select>
 
                 <Select
-                    defaultValue={searchParams.get("perPage")?.toString() || "10"}
+                    defaultValue={initialPerPage}
                     onValueChange={handlePerPageChange}
                 >
                     <SelectTrigger className="w-[100px]">
