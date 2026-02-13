@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // Redirect to home page or the page the user was trying to access
-  return NextResponse.redirect(new URL("/", requestUrl.origin));
+  // Redirect to home page
+  const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
+  return NextResponse.redirect(new URL("/", origin));
 }
