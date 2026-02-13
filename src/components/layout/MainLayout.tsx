@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sidebar, SidebarContent } from "@/components/layout/Sidebar";
 import { getShows } from "@/lib/services/shows"; // Server-side fetch
 import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 import { SearchBar } from "@/components/search/SearchBar";
 import { UserMenu } from "@/components/navbar/UserMenu";
 import { getCurrentUser, getCurrentProfile } from "@/lib/auth/server";
-import { AlertCircle, Podcast } from "lucide-react";
+import { AlertCircle, Podcast, Menu } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,9 +26,20 @@ export async function MainLayout({ children }: MainLayoutProps) {
       <main className="lg:ml-72 min-h-screen flex flex-col">
         <header className="sticky top-0 z-50 glass-header px-4 md:px-10 py-4 md:py-6 flex justify-between items-center gap-4">
           <div className="lg:hidden flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center shadow-sm">
-              <Podcast className="text-text-primary" size={20} />
-            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center shadow-sm hover:bg-cta-hover transition-colors"
+                  aria-label="Open menu"
+                >
+                  <Menu className="text-text-primary" size={20} />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 border-r border-border-subtle bg-surface w-72">
+                <SidebarContent shows={shows} />
+              </SheetContent>
+            </Sheet>
+
             <Link href="/" className="font-black tracking-tighter text-text-primary text-lg">
               Podcast 聽了以後
             </Link>
