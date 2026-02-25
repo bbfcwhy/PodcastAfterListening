@@ -1,16 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Podcast } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
 
 export function HomeHero() {
   return (
     <div className="max-w-7xl mx-auto py-12 md:py-24 px-4 md:px-10">
       <div className="mb-24 md:mb-32 flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
         <div className="flex-1 text-center lg:text-left">
-          <div className="mb-8">
-            <Logo variant="icon" size="lg" />
-          </div>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 md:mb-10 tracking-tighter leading-[1.1] text-text-primary">
             Podcast 聽了以後
           </h2>
