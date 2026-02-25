@@ -41,7 +41,7 @@ USING (auth.uid() = user_id);
 CREATE TABLE IF NOT EXISTS episode_library_items (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  episode_id UUID REFERENCES episodes(id) ON DELETE CASCADE NOT NULL,
+  episode_id UUID REFERENCES podcast_episodes(id) ON DELETE CASCADE NOT NULL,
   added_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   UNIQUE(user_id, episode_id)
 );
