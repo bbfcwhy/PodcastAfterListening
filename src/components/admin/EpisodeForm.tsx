@@ -17,6 +17,7 @@ import type { Episode, Show } from "@/types/database";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EPISODE_LONG_TEXT_MAX_LENGTH } from "@/lib/constants";
+import { TagPicker } from "@/components/admin/TagPicker";
 
 interface EpisodeFormProps {
   episode?: Episode;
@@ -34,10 +35,22 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
   const [conflict, setConflict] = useState<{ current_updated_at: string } | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showId, setShowId] = useState(episode?.show_id ?? "");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   const isEdit = !!episode;
   const showDeletedWarning =
     isEdit && episode && !shows.some((s) => s.id === episode.show_id);
+
+  // Load existing tags for edit mode
+  useEffect(() => {
+    if (!episode?.id) return;
+    fetch(`/api/admin/episodes/${episode.id}/tags`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.tag_ids) setSelectedTagIds(data.tag_ids);
+      })
+      .catch(() => {});
+  }, [episode?.id]);
 
   useEffect(() => {
     const fn = (e: BeforeUnloadEvent) => {
@@ -102,6 +115,13 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
           setLoading(false);
           return;
         }
+
+        // Save tags
+        await fetch(`/api/admin/episodes/${episode.id}/tags`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tag_ids: selectedTagIds }),
+        });
 
         setDirty(false);
         setSaveSuccess(true);
@@ -390,6 +410,18 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
           rows={6}
           disabled={loading}
           onChange={markDirty}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>標籤（選填，最多 10 個）</Label>
+        <TagPicker
+          selectedTagIds={selectedTagIds}
+          onChange={(ids) => {
+            setSelectedTagIds(ids);
+            markDirty();
+          }}
+          disabled={loading}
         />
       </div>
 

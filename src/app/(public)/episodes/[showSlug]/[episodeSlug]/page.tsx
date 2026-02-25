@@ -199,9 +199,13 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
             {tags.length > 0 && (
               <div className="flex gap-2">
                 {tags.map((tag) => (
-                  <span key={tag.id} className="text-xs">
+                  <Link
+                    key={tag.id}
+                    href={`/tags/${encodeURIComponent(tag.slug)}`}
+                    className="text-xs hover:text-cta transition-colors"
+                  >
                     #{tag.name}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}

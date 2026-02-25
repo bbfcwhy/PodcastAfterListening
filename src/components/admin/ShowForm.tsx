@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Show } from "@/types/database";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
+import { TagPicker } from "@/components/admin/TagPicker";
 
 type FieldError = Record<string, string>;
 
@@ -38,11 +39,23 @@ export function ShowForm({ show }: ShowFormProps) {
     original_url: show?.original_url ?? "",
     rss_feed_url: show?.rss_feed_url ?? "",
     hosting_provided_by: show?.hosting_provided_by ?? "",
-    tags: show?.tags?.join(", ") ?? "",
     show_categories: show?.show_categories?.join(", ") ?? "",
   });
 
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+
   const isEdit = !!show;
+
+  // Load existing tags for edit mode
+  useEffect(() => {
+    if (!show?.id) return;
+    fetch(`/api/admin/shows/${show.id}/tags`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.tag_ids) setSelectedTagIds(data.tag_ids);
+      })
+      .catch(() => {});
+  }, [show?.id]);
 
   useEffect(() => {
     const fn = (e: BeforeUnloadEvent) => {
@@ -78,7 +91,6 @@ export function ShowForm({ show }: ShowFormProps) {
       const method = show ? "PATCH" : "POST";
       const body: Record<string, unknown> = {
         ...formData,
-        tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : null,
         show_categories: formData.show_categories ? formData.show_categories.split(",").map((c: string) => c.trim()).filter(Boolean) : null,
       };
       if (show?.updated_at) body.updated_at = show.updated_at;
@@ -111,6 +123,16 @@ export function ShowForm({ show }: ShowFormProps) {
         }
         setIsSubmitting(false);
         return;
+      }
+
+      // Save tags if editing
+      const showId = show?.id || data?.id;
+      if (showId) {
+        await fetch(`/api/admin/shows/${showId}/tags`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tag_ids: selectedTagIds }),
+        });
       }
 
       setDirty(false);
@@ -405,18 +427,14 @@ export function ShowForm({ show }: ShowFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags" className="text-text-primary">
-              標籤（選填，以逗號分隔）
-            </Label>
-            <Input
-              id="tags"
-              value={formData.tags}
-              onChange={(e) => {
-                setFormData({ ...formData, tags: e.target.value });
+            <Label className="text-text-primary">標籤（選填）</Label>
+            <TagPicker
+              selectedTagIds={selectedTagIds}
+              onChange={(ids) => {
+                setSelectedTagIds(ids);
                 markDirty();
               }}
-              placeholder="tag1, tag2, tag3"
-              className="bg-surface border-border-subtle"
+              disabled={isSubmitting}
             />
           </div>
 

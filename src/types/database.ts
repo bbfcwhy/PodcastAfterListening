@@ -20,7 +20,6 @@ export interface Database {
           rss_feed_url: string | null;
           hosting_provided_by: string | null;
           show_categories: string[] | null;
-          tags: string[] | null; // New field
           position: number;
           created_at: string;
           updated_at: string;
@@ -350,6 +349,20 @@ export interface Database {
           user_id?: string;
           episode_id?: string;
           added_at?: string;
+        };
+      };
+      show_tags: {
+        Row: {
+          show_id: string;
+          tag_id: string;
+        };
+        Insert: {
+          show_id: string;
+          tag_id: string;
+        };
+        Update: {
+          show_id?: string;
+          tag_id?: string;
         };
       };
       affiliate_clicks: {

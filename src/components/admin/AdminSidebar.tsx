@@ -9,12 +9,14 @@ import {
     MessageSquare,
     LogOut,
     Radio,
+    Tag,
 } from "lucide-react";
 
 const navItems = [
     { href: "/dashboard", label: "儀表板", icon: LayoutDashboard },
     { href: "/shows", label: "節目管理", icon: Radio },
     { href: "/episodes", label: "單集管理", icon: FileText },
+    { href: "/tags", label: "標籤管理", icon: Tag },
     { href: "/comments", label: "留言審核", icon: MessageSquare },
     { href: "/affiliates", label: "聯盟行銷", icon: FileText },
 ];

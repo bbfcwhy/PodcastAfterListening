@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type { Show, Tag } from "@/types/database";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -18,9 +19,11 @@ interface SearchFiltersProps {
   tags: Tag[];
 }
 
-export function SearchFilters({ shows, tags: _tags }: SearchFiltersProps) {
+export function SearchFilters({ shows, tags }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const selectedTags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -29,6 +32,25 @@ export function SearchFilters({ shows, tags: _tags }: SearchFiltersProps) {
       params.set(key, value);
     } else {
       params.delete(key);
+    }
+    router.push(`/search?${params.toString()}`);
+  };
+
+  const toggleTag = (tagId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const current = params.get("tags")?.split(",").filter(Boolean) || [];
+
+    let updated: string[];
+    if (current.includes(tagId)) {
+      updated = current.filter((id) => id !== tagId);
+    } else {
+      updated = [...current, tagId];
+    }
+
+    if (updated.length > 0) {
+      params.set("tags", updated.join(","));
+    } else {
+      params.delete("tags");
     }
     router.push(`/search?${params.toString()}`);
   };
@@ -56,6 +78,31 @@ export function SearchFilters({ shows, tags: _tags }: SearchFiltersProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {tags.length > 0 && (
+        <div className="space-y-2">
+          <Label className="text-text-secondary text-sm font-bold">標籤</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag) => {
+              const isSelected = selectedTags.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                >
+                  <Badge
+                    variant={isSelected ? "default" : "outline"}
+                    className="cursor-pointer"
+                  >
+                    {tag.name}
+                  </Badge>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="fromDate" className="text-text-secondary text-sm font-bold">開始日期</Label>
