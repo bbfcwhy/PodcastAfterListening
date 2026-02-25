@@ -8,6 +8,7 @@ import { OriginalLinkButton } from "@/components/episodes/OriginalLinkButton";
 import { HostCard } from "@/components/hosts/HostCard";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { AffiliateSection } from "@/components/affiliates/AffiliateSection";
+import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 import { getEpisodeDetail } from "@/lib/services/episodes";
 import { getCommentsByEpisode } from "@/lib/services/comments";
 import { getAffiliatesByEpisode } from "@/lib/services/affiliates";
@@ -109,7 +110,7 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="max-w-4xl mx-auto space-y-8">
+      <article className="max-w-4xl mx-auto px-4 md:px-6 space-y-8">
         {/* 節目區塊 */}
         <div className="rounded-[2.5rem] border border-border-subtle bg-surface p-6 md:p-8 shadow-sm">
           <Link
@@ -241,6 +242,9 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
         ) : (
           <div className="text-muted-foreground">本集無單集說明</div>
         )}
+
+        {/* AI Disclaimer */}
+        <AIDisclaimer />
 
         {/* Tabs Section */}
         <Tabs defaultValue="summary" className="w-full">

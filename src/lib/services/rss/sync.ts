@@ -104,6 +104,28 @@ export async function syncShowFromRss(
     }
   }
 
+  // Sync categories as tags
+  if (channel.categories != null && channel.categories.length > 0) {
+    for (const catName of channel.categories) {
+      const trimmed = catName.trim();
+      if (!trimmed) continue;
+
+      // Upsert tag
+      const { data: tag } = await supabase
+        .from("tags")
+        .upsert({ name: trimmed, slug: trimmed }, { onConflict: "name" })
+        .select("id")
+        .single();
+
+      if (tag) {
+        // Link show to tag
+        await supabase
+          .from("show_tags")
+          .upsert({ show_id: showId, tag_id: tag.id }, { onConflict: "show_id,tag_id" });
+      }
+    }
+  }
+
   if (channel.author?.trim()) {
     const hostName = channel.author.trim();
     const { data: existingHost } = await supabase

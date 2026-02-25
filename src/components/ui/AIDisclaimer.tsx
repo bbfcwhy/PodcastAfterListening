@@ -8,7 +8,7 @@ export function AIDisclaimer() {
       </div>
       <p className="text-[11px] md:text-xs text-text-secondary font-bold leading-relaxed">
         <span className="text-text-primary font-black">重要提示：</span>
-        以下內容由 AI 自動解析產生，僅供參考，一切以原始 Podcast 節目內容為準。
+        以下內容大綱、業配資訊、逐字稿均由 AI 自動產生，僅供參考，一切以原始 Podcast 節目內容為準。
       </p>
     </div>
   );

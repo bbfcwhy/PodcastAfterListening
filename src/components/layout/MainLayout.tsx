@@ -1,12 +1,11 @@
-import Link from "next/link";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar, SidebarContent } from "@/components/layout/Sidebar";
 import { getShows } from "@/lib/services/shows"; // Server-side fetch
-import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 import { SearchBar } from "@/components/search/SearchBar";
 import { UserMenu } from "@/components/navbar/UserMenu";
+import { Logo } from "@/components/ui/Logo";
 import { getCurrentUser, getCurrentProfile } from "@/lib/auth/server";
-import { AlertCircle, Podcast, Menu } from "lucide-react";
+import { AlertCircle, Menu } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -41,9 +40,7 @@ export async function MainLayout({ children }: MainLayoutProps) {
               </SheetContent>
             </Sheet>
 
-            <Link href="/" className="font-black tracking-tighter text-text-primary text-lg">
-              Podcast 聽了以後
-            </Link>
+            <Logo href="/" size="sm" />
           </div>
 
           <div className="relative max-w-md w-full hidden md:block">
@@ -68,19 +65,12 @@ export async function MainLayout({ children }: MainLayoutProps) {
           <SearchBar />
         </div>
 
-        <div className="px-4 md:px-10 py-3">
-          <AIDisclaimer />
-        </div>
-
         <div className="flex-1">{children}</div>
 
         <footer className="mt-24 md:mt-32 border-t border-border-subtle/10 py-16 md:py-20 px-4 md:px-10 bg-cta/5">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="flex justify-center gap-4 items-center text-text-secondary">
-              <Podcast size={32} />
-              <span className="font-black tracking-tighter uppercase text-text-primary text-xl md:text-2xl">
-                Podcast 聽了以後
-              </span>
+            <div className="flex justify-center">
+              <Logo size="lg" />
             </div>
             <p className="text-xs md:text-sm text-text-secondary leading-relaxed max-w-2xl mx-auto font-bold">
               我的 Podcast 筆記網站，也是給大家回顧聽過的 Podcast 內容的地方。內容由 AI 協助彙整，實際內容請以原節目為準。

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Show } from "@/types/database";
+import { Logo } from "@/components/ui/Logo";
 import {
   Library,
   Clock,
@@ -21,12 +22,9 @@ export function SidebarContent({ shows }: { shows: (Show & { episode_count?: num
 
   return (
     <div className="p-6">
-      <Link href="/" className="block mb-8">
-        <h1 className="text-xl font-black tracking-tighter text-text-primary uppercase">
-          Podcast<br />
-          <span className="text-cta">After Listening</span>
-        </h1>
-      </Link>
+      <div className="mb-8">
+        <Logo href="/" size="md" />
+      </div>
 
       <nav className="space-y-8">
         <div>

@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
 
 interface EpisodeSummaryProps {
   summary: string | null;
@@ -10,7 +9,6 @@ export function EpisodeSummary({ summary }: EpisodeSummaryProps) {
     <Card>
       <CardHeader>
         <CardTitle>節目大綱</CardTitle>
-        <AIDisclaimer />
       </CardHeader>
       <CardContent>
         {summary ? (
