@@ -18,7 +18,7 @@ interface Tag {
 export default function EditTagPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = params.slug as string;
 
   const [tag, setTag] = useState<Tag | null>(null);
   const [name, setName] = useState("");
