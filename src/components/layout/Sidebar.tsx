@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import type { Show } from "@/types/database";
+import type { Show, Tag } from "@/types/database";
 import { Logo } from "@/components/ui/Logo";
 import {
   Library,
@@ -14,10 +14,11 @@ import {
 
 interface SidebarProps {
   shows: (Show & { episode_count?: number })[];
+  tags: Tag[];
   className?: string;
 }
 
-export function SidebarContent({ shows }: { shows: (Show & { episode_count?: number })[] }) {
+export function SidebarContent({ shows, tags }: { shows: (Show & { episode_count?: number })[]; tags: Tag[] }) {
   const pathname = usePathname();
 
   return (
@@ -113,35 +114,43 @@ export function SidebarContent({ shows }: { shows: (Show & { episode_count?: num
           </ul>
         </div>
 
-        <div>
-          <div className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4 pl-3">
-            Tags
+        {tags.length > 0 && (
+          <div>
+            <div className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-4 pl-3">
+              Tags
+            </div>
+            <ul className="space-y-1">
+              {tags.map((tag) => (
+                <li key={tag.id}>
+                  <Link
+                    href={`/tags/${encodeURIComponent(tag.slug)}`}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                      pathname === `/tags/${encodeURIComponent(tag.slug)}`
+                        ? "bg-selected text-text-primary"
+                        : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                    )}
+                  >
+                    <Hash size={18} />
+                    <span className="truncate">{tag.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-1">
-            {/* Categories can be dynamically loaded here later */}
-            <li>
-              <Link
-                href="/tags/tech"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-text-secondary hover:text-text-primary hover:bg-hover transition-colors"
-              >
-                <Hash size={18} />
-                <span>Tech</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
+        )}
       </nav>
     </div>
   );
 }
 
-export function Sidebar({ shows, className }: SidebarProps) {
+export function Sidebar({ shows, tags, className }: SidebarProps) {
   return (
     <aside className={cn(
       "w-72 bg-surface border-r border-border-subtle h-screen fixed left-0 top-0 overflow-y-auto hidden lg:block",
       className
     )}>
-      <SidebarContent shows={shows} />
+      <SidebarContent shows={shows} tags={tags} />
     </aside>
   );
 }

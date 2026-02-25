@@ -52,6 +52,29 @@ export async function getEpisodesByTag(tagId: string) {
   return episodes || [];
 }
 
+export async function getShowsByTag(tagId: string) {
+  const supabase = await createClient();
+
+  const { data: tagLinks } = await supabase
+    .from("show_tags")
+    .select("show_id")
+    .eq("tag_id", tagId);
+
+  if (!tagLinks || tagLinks.length === 0) return [];
+
+  const showIds = (tagLinks as { show_id: string }[]).map(
+    (link) => link.show_id
+  );
+
+  const { data: shows } = await supabase
+    .from("shows")
+    .select("*")
+    .in("id", showIds)
+    .order("name", { ascending: true });
+
+  return shows || [];
+}
+
 export async function getTagUsageCount(
   tagId: string
 ): Promise<{ episode_count: number; show_count: number }> {

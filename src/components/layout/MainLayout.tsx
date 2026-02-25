@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar, SidebarContent } from "@/components/layout/Sidebar";
 import { getShows } from "@/lib/services/shows"; // Server-side fetch
+import { getAllTags } from "@/lib/tags/actions";
 import { SearchBar } from "@/components/search/SearchBar";
 import { UserMenu } from "@/components/navbar/UserMenu";
 import { Logo } from "@/components/ui/Logo";
@@ -13,14 +14,17 @@ interface MainLayoutProps {
 
 export async function MainLayout({ children }: MainLayoutProps) {
   // This is a Server Component, so it can safely call getShows() (which uses cookies())
-  const shows = await getShows();
-  const user = await getCurrentUser();
-  const profile = await getCurrentProfile();
+  const [shows, tags, user, profile] = await Promise.all([
+    getShows(),
+    getAllTags(),
+    getCurrentUser(),
+    getCurrentProfile(),
+  ]);
 
   return (
     <div className="min-h-screen bg-canvas text-text-primary">
       {/* Pass data to Client Component */}
-      <Sidebar shows={shows} />
+      <Sidebar shows={shows} tags={tags} />
 
       <main className="lg:ml-72 min-h-screen flex flex-col">
         <header className="sticky top-0 z-50 glass-header px-4 md:px-10 py-4 md:py-6 flex justify-between items-center gap-4">
@@ -36,7 +40,7 @@ export async function MainLayout({ children }: MainLayoutProps) {
               </SheetTrigger>
               <SheetContent side="left" className="p-0 border-r border-border-subtle bg-surface w-72">
                 <SheetTitle className="sr-only">導覽選單</SheetTitle>
-                <SidebarContent shows={shows} />
+                <SidebarContent shows={shows} tags={tags} />
               </SheetContent>
             </Sheet>
 
