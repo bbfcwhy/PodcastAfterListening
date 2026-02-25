@@ -106,7 +106,7 @@ export default async function LibraryPage() {
                     latestCommentAt: stats.latestAt,
                 };
             })
-            .sort((a, b) => new Date(b.latestCommentAt).getTime() - new Date(a.latestCommentAt).getTime());
+            .sort((a: CommentedEpisodeItem, b: CommentedEpisodeItem) => new Date(b.latestCommentAt).getTime() - new Date(a.latestCommentAt).getTime());
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
