@@ -30,7 +30,7 @@ export function CommentedEpisodeList({ items }: CommentedEpisodeListProps) {
     }
 
     return (
-        <div className="max-w-3xl space-y-3">
+        <div className="space-y-3">
             {items.map((item) => (
                 <div
                     key={item.episode.id}
