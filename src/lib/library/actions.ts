@@ -23,7 +23,6 @@ export async function addToLibrary(showId: string) {
     }
 
     revalidatePath("/library");
-    revalidatePath(`/shows/${showId}`); // Optional: update button state on show page
 }
 
 export async function removeFromLibrary(showId: string) {
@@ -44,7 +43,6 @@ export async function removeFromLibrary(showId: string) {
     }
 
     revalidatePath("/library");
-    revalidatePath(`/shows/${showId}`);
 }
 
 export async function updateLibraryOrder(items: { id: string; position: number }[]) {

@@ -332,6 +332,26 @@ export interface Database {
           position?: number;
         };
       };
+      episode_library_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          episode_id: string;
+          added_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          episode_id: string;
+          added_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          episode_id?: string;
+          added_at?: string;
+        };
+      };
       affiliate_clicks: {
         Row: {
           id: string;
@@ -374,3 +394,7 @@ export type Comment = Database["public"]["Tables"]["comments"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type LibraryItem = Database["public"]["Tables"]["library_items"]["Row"];
 export type AffiliateContent = Database["public"]["Tables"]["affiliate_contents"]["Row"];
+export type EpisodeLibraryItem = Database["public"]["Tables"]["episode_library_items"]["Row"];
+export type EpisodeLibraryItemWithEpisode = EpisodeLibraryItem & {
+  episode: Episode & { show: Pick<Show, "name" | "slug" | "cover_image_url"> };
+};

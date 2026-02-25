@@ -4,7 +4,6 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { EpisodeSummary } from "@/components/episodes/EpisodeSummary";
 import { SponsorshipSection } from "@/components/episodes/SponsorshipSection";
 import { OwnerNotes } from "@/components/episodes/OwnerNotes";
-import { TranscriptSection } from "@/components/episodes/TranscriptSection";
 import { OriginalLinkButton } from "@/components/episodes/OriginalLinkButton";
 import { HostCard } from "@/components/hosts/HostCard";
 import { CommentSection } from "@/components/comments/CommentSection";
@@ -12,6 +11,9 @@ import { AffiliateSection } from "@/components/affiliates/AffiliateSection";
 import { getEpisodeDetail } from "@/lib/services/episodes";
 import { getCommentsByEpisode } from "@/lib/services/comments";
 import { getAffiliatesByEpisode } from "@/lib/services/affiliates";
+import { getCurrentUser } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
+import { AddEpisodeToLibraryButton } from "@/components/library/AddEpisodeToLibraryButton";
 import { stripHtml } from "@/lib/utils/sanitize";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
@@ -67,6 +69,20 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
 
   // Fetch affiliates
   const affiliates = await getAffiliatesByEpisode(episode.id);
+
+  // Check if episode is in user's library
+  const user = await getCurrentUser();
+  let isEpisodeInLibrary = false;
+  if (user) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("episode_library_items")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("episode_id", episode.id)
+      .maybeSingle();
+    isEpisodeInLibrary = !!data;
+  }
 
   const publishedDate = episode.published_at
     ? format(new Date(episode.published_at), "yyyy年MM月dd日", { locale: zhTW })
@@ -168,7 +184,16 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
               {show.name}
             </Link>
           </div>
-          <h1 className="text-4xl font-bold">{episode.title}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-4xl font-bold">{episode.title}</h1>
+            {user && (
+              <AddEpisodeToLibraryButton
+                episodeId={episode.id}
+                initialIsAdded={isEpisodeInLibrary}
+                className="shrink-0 mt-1"
+              />
+            )}
+          </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             {publishedDate && <span>發布日期：{publishedDate}</span>}
             {tags.length > 0 && (
@@ -215,7 +240,7 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
 
         {/* Tabs Section */}
         <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface border border-border-subtle p-1 h-auto rounded-[2rem]">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-surface border border-border-subtle p-1 h-auto rounded-[2rem]">
             <TabsTrigger
               value="summary"
               className="rounded-[1.5rem] py-3 text-sm md:text-base font-bold data-[state=active]:bg-cta data-[state=active]:text-white transition-all"
@@ -233,6 +258,12 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
               className="rounded-[1.5rem] py-3 text-sm md:text-base font-bold data-[state=active]:bg-cta data-[state=active]:text-white transition-all"
             >
               站長聽後感
+            </TabsTrigger>
+            <TabsTrigger
+              value="transcript"
+              className="rounded-[1.5rem] py-3 text-sm md:text-base font-bold data-[state=active]:bg-cta data-[state=active]:text-white transition-all"
+            >
+              逐字稿
             </TabsTrigger>
           </TabsList>
 
@@ -268,10 +299,22 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
               </div>
             )}
           </TabsContent>
-        </Tabs>
 
-        {/* Transcript Section */}
-        <TranscriptSection transcript={episode.transcript} />
+          <TabsContent value="transcript" className="space-y-6 animate-in fade-in-50 duration-300">
+            {episode.transcript ? (
+              <div className="bg-surface rounded-[2.5rem] border border-border-subtle p-6 md:p-8">
+                <div className="prose max-w-none max-h-96 overflow-y-auto">
+                  <p className="whitespace-pre-wrap text-text-secondary">{episode.transcript}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground bg-surface rounded-[2.5rem] border border-border-subtle">
+                <p className="font-medium">逐字稿準備中</p>
+                <p className="text-sm mt-2">AI 逐字稿尚未生成</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Affiliate Section */}
         <AffiliateSection affiliates={affiliates} episodeId={episode.id} />

@@ -4,17 +4,17 @@ import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
-import { addToLibrary, removeFromLibrary } from "@/lib/library/actions";
-import { Plus, Check, Loader2 } from "lucide-react";
+import { addEpisodeToLibrary, removeEpisodeFromLibrary } from "@/lib/library/episode-actions";
+import { Bookmark, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface AddToLibraryButtonProps {
-    showId: string;
+interface AddEpisodeToLibraryButtonProps {
+    episodeId: string;
     initialIsAdded: boolean;
     className?: string;
 }
 
-export function AddToLibraryButton({ showId, initialIsAdded, className }: AddToLibraryButtonProps) {
+export function AddEpisodeToLibraryButton({ episodeId, initialIsAdded, className }: AddEpisodeToLibraryButtonProps) {
     const [isPending, startTransition] = useTransition();
     const [isAdded, setIsAdded] = useState(initialIsAdded);
     const router = useRouter();
@@ -23,22 +23,22 @@ export function AddToLibraryButton({ showId, initialIsAdded, className }: AddToL
         startTransition(async () => {
             try {
                 if (isAdded) {
-                    await removeFromLibrary(showId);
+                    await removeEpisodeFromLibrary(episodeId);
                     setIsAdded(false);
                 } else {
-                    await addToLibrary(showId);
+                    await addEpisodeToLibrary(episodeId);
                     setIsAdded(true);
                 }
                 router.refresh();
             } catch (error) {
-                logger.error("Library action failed", error);
+                logger.error("Episode library action failed", error);
             }
         });
     };
 
     return (
         <Button
-            variant={isAdded ? "secondary" : "default"}
+            variant={isAdded ? "secondary" : "outline"}
             size="sm"
             className={cn("gap-2 font-bold", className)}
             onClick={toggleLibrary}
@@ -46,12 +46,10 @@ export function AddToLibraryButton({ showId, initialIsAdded, className }: AddToL
         >
             {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-            ) : isAdded ? (
-                <Check className="w-4 h-4" />
             ) : (
-                <Plus className="w-4 h-4" />
+                <Bookmark className={cn("w-4 h-4", isAdded && "fill-current")} />
             )}
-            {isAdded ? "In Library" : "Library"}
+            {isAdded ? "已收藏單集" : "收藏單集"}
         </Button>
     );
 }

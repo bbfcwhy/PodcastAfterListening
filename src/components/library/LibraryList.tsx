@@ -94,9 +94,13 @@ function SortableItem({ item }: { item: LibraryItemWithShow }) {
     );
 }
 
-export function LibraryList({ items: initialItems }: LibraryListProps) {
-    // Local state for optimistic UI updates
-    const [items, setItems] = useState(initialItems);
+export function LibraryList({ items }: LibraryListProps) {
+    const [sortedItems, setSortedItems] = useState(items);
+
+    // Sync with server data when props change (fixes stale props after router.refresh)
+    if (items !== sortedItems && JSON.stringify(items.map(i => i.id)) !== JSON.stringify(sortedItems.map(i => i.id))) {
+        setSortedItems(items);
+    }
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -109,23 +113,19 @@ export function LibraryList({ items: initialItems }: LibraryListProps) {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            setItems((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-                const newIndex = items.findIndex((item) => item.id === over.id);
+            setSortedItems((prev) => {
+                const oldIndex = prev.findIndex((item) => item.id === active.id);
+                const newIndex = prev.findIndex((item) => item.id === over.id);
 
-                const newItems = arrayMove(items, oldIndex, newIndex);
+                const newItems = arrayMove(prev, oldIndex, newIndex);
 
-                // Prepare updates for server
-                // Assign new positions based on index
                 const updates = newItems.map((item, index) => ({
                     id: item.id,
                     position: index,
                 }));
 
-                // Call server action
                 updateLibraryOrder(updates).catch((err) => {
                     logger.error("Failed to update order", err);
-                    // Ideally revert optimistic update here
                 });
 
                 return newItems;
@@ -133,7 +133,7 @@ export function LibraryList({ items: initialItems }: LibraryListProps) {
         }
     };
 
-    if (items.length === 0) {
+    if (sortedItems.length === 0) {
         return (
             <div className="text-center py-20 text-text-secondary">
                 <p className="text-lg font-bold mb-4">你的收藏庫是空的</p>
@@ -151,11 +151,11 @@ export function LibraryList({ items: initialItems }: LibraryListProps) {
             onDragEnd={handleDragEnd}
         >
             <SortableContext
-                items={items.map((item) => item.id)}
+                items={sortedItems.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
             >
                 <div className="max-w-3xl">
-                    {items.map((item) => (
+                    {sortedItems.map((item) => (
                         <SortableItem key={item.id} item={item} />
                     ))}
                 </div>
