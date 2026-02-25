@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar, SidebarContent } from "@/components/layout/Sidebar";
 import { getShows } from "@/lib/services/shows"; // Server-side fetch
 import { AIDisclaimer } from "@/components/ui/AIDisclaimer";
@@ -36,6 +36,7 @@ export async function MainLayout({ children }: MainLayoutProps) {
                 </button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 border-r border-border-subtle bg-surface w-72">
+                <SheetTitle className="sr-only">導覽選單</SheetTitle>
                 <SidebarContent shows={shows} />
               </SheetContent>
             </Sheet>

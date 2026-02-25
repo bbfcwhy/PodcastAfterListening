@@ -126,7 +126,7 @@ export default async function LibraryPage() {
             <div className="max-w-6xl mx-auto py-12 px-4 md:px-10">
                 <h1 className="text-3xl font-black mb-8 text-text-primary">我的收藏庫</h1>
                 <Tabs defaultValue="shows" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface border border-border-subtle p-1 h-auto rounded-[2rem] max-w-lg">
+                    <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface border border-border-subtle p-1 h-auto rounded-[2rem]">
                         <TabsTrigger
                             value="shows"
                             className="rounded-[1.5rem] py-3 text-sm md:text-base font-bold data-[state=active]:bg-cta data-[state=active]:text-white transition-all"
