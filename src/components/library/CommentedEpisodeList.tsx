@@ -11,6 +11,7 @@ export interface CommentedEpisodeItem {
     episode: Episode & { show: Pick<Show, "name" | "slug" | "cover_image_url"> };
     commentCount: number;
     latestCommentAt: string;
+    comments: { content: string; createdAt: string }[];
 }
 
 interface CommentedEpisodeListProps {
@@ -30,16 +31,14 @@ export function CommentedEpisodeList({ items }: CommentedEpisodeListProps) {
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-4">
             {items.map((item) => (
-                <div
+                <Link
                     key={item.episode.id}
-                    className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-border-subtle shadow-sm hover:border-cta/50 transition-colors"
+                    href={`/episodes/${item.episode.show.slug}/${item.episode.slug}`}
+                    className="block bg-surface rounded-xl border border-border-subtle shadow-sm hover:border-cta/50 transition-colors"
                 >
-                    <Link
-                        href={`/episodes/${item.episode.show.slug}/${item.episode.slug}`}
-                        className="flex-1 flex items-center gap-4 min-w-0"
-                    >
+                    <div className="flex items-center gap-4 p-4">
                         <div className="w-16 h-16 rounded-lg bg-surface-highlight overflow-hidden shrink-0">
                             {item.episode.show.cover_image_url ? (
                                 <img
@@ -70,8 +69,18 @@ export function CommentedEpisodeList({ items }: CommentedEpisodeListProps) {
                                 </span>
                             </div>
                         </div>
-                    </Link>
-                </div>
+                    </div>
+                    <div className="px-4 pb-4 space-y-2">
+                        {item.comments.map((comment, idx) => (
+                            <div key={idx} className="bg-canvas rounded-lg px-4 py-3">
+                                <p className="text-sm text-text-primary line-clamp-2">{comment.content}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {format(new Date(comment.createdAt), "yyyy年MM月dd日 HH:mm", { locale: zhTW })}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </Link>
             ))}
         </div>
     );

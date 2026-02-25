@@ -57,7 +57,7 @@ export default async function LibraryPage() {
     // 查詢使用者的 approved 留言
     const { data: userComments, error: commentsError } = await supabase
         .from("comments")
-        .select("episode_id, created_at")
+        .select("episode_id, content, created_at")
         .eq("user_id", user.id)
         .eq("status", "approved")
         .order("created_at", { ascending: false });
@@ -66,16 +66,19 @@ export default async function LibraryPage() {
         logger.error("Error fetching user comments:", commentsError);
     }
 
-    // 按 episode_id 分組，計算留言數和最新留言時間
-    const commentsByEpisode = new Map<string, { count: number; latestAt: string }>();
+    // 按 episode_id 分組，收集留言內容、數量和最新留言時間
+    const commentsByEpisode = new Map<string, { count: number; latestAt: string; comments: { content: string; createdAt: string }[] }>();
     for (const comment of userComments || []) {
         const existing = commentsByEpisode.get(comment.episode_id);
+        const item = { content: comment.content, createdAt: comment.created_at };
         if (existing) {
             existing.count++;
+            existing.comments.push(item);
         } else {
             commentsByEpisode.set(comment.episode_id, {
                 count: 1,
                 latestAt: comment.created_at,
+                comments: [item],
             });
         }
     }
@@ -104,6 +107,7 @@ export default async function LibraryPage() {
                     episode: ep,
                     commentCount: stats.count,
                     latestCommentAt: stats.latestAt,
+                    comments: stats.comments,
                 };
             })
             .sort((a: CommentedEpisodeItem, b: CommentedEpisodeItem) => new Date(b.latestCommentAt).getTime() - new Date(a.latestCommentAt).getTime());
