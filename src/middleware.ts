@@ -1,9 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Next.js 16 proxy - renamed from middleware to clarify its purpose
-// Proxy runs at the Edge Runtime and acts as a network boundary in front of the app
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -75,7 +73,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// Matcher configuration for proxy
+// Matcher configuration for middleware
 export const config = {
   matcher: [
     /*

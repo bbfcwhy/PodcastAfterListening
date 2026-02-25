@@ -5,27 +5,18 @@ import { checkSpam } from "@/lib/spam-filter";
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
-// Rate limiting store (in production, use Redis or similar)
-const rateLimitStore = new Map<
-  string,
-  { count: number; resetTime: number }
->();
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now();
-  const userLimit = rateLimitStore.get(userId);
-
-  if (!userLimit || now > userLimit.resetTime) {
-    rateLimitStore.set(userId, { count: 1, resetTime: now + 60000 }); // 1 minute
-    return true;
-  }
-
-  if (userLimit.count >= 3) {
-    return false; // Rate limit exceeded
-  }
-
-  userLimit.count++;
-  return true;
+// Rate limiting: check recent comments count in DB (works across stateless runtimes)
+async function checkRateLimit(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<boolean> {
+  const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+  const { count } = await supabase
+    .from("comments")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", oneMinuteAgo);
+  return (count ?? 0) < 3;
 }
 
 export async function GET(
@@ -81,7 +72,7 @@ export async function POST(
     }
 
     // Check rate limit
-    if (!checkRateLimit(user.id)) {
+    if (!(await checkRateLimit(supabase, user.id))) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please wait before posting again." },
         { status: 429 }
