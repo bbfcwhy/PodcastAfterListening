@@ -1,17 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Podcast } from "lucide-react";
+import { Podcast } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 export function HomeHero() {
   return (
     <div className="max-w-7xl mx-auto py-12 md:py-24 px-4 md:px-10">
       <div className="mb-24 md:mb-32 flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
         <div className="flex-1 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cta/10 rounded-full mb-8">
-            <Sparkles className="text-cta" size={16} />
-            <span className="text-[10px] font-black text-cta uppercase tracking-[0.3em]">
-              Podcast After Listening
-            </span>
+          <div className="mb-8">
+            <Logo size="md" />
           </div>
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 md:mb-10 tracking-tighter leading-[1.1] text-text-primary">
             Podcast 聽了以後
