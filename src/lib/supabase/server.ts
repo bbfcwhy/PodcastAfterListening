@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /** Minimal thenable chain that resolves to empty data. Used when Supabase env is missing (e.g. E2E). */
@@ -68,4 +69,16 @@ export async function createClient() {
       },
     },
   });
+}
+
+/** Service-role client that bypasses RLS. Use only for system-level operations. */
+export function createServiceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (!url || !serviceKey) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY for service client");
+  }
+
+  return createSupabaseClient(url, serviceKey);
 }

@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -14,13 +15,18 @@ export async function GET(request: Request) {
       const displayName = user.user_metadata.full_name || user.user_metadata.name || user.email?.split("@")[0];
       const avatarUrl = user.user_metadata.avatar_url || user.user_metadata.picture;
 
-      // Sync profile
-      await supabase.from("profiles").upsert({
-        id: user.id,
-        display_name: displayName,
-        avatar_url: avatarUrl,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "id" });
+      // Use service client to bypass RLS for profile upsert (INSERT policy not needed)
+      try {
+        const serviceClient = createServiceClient();
+        await serviceClient.from("profiles").upsert({
+          id: user.id,
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "id" });
+      } catch (err) {
+        logger.error("Failed to sync profile:", err);
+      }
     }
   }
 
