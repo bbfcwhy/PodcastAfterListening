@@ -1,74 +1,40 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
 
-# Testing
-coverage/
-playwright-report/
-test-results/
-*.log
-
-# Next.js
-.next/
-out/
+# Build
+.build/
 build/
-dist/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
 
-# Production
-*.log
-*.pid
-*.seed
-*.pid.lock
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved
 
-# Environment variables
-.env
-.env*.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# macOS
+.DS_Store
+*.swp
+*~
 
 # IDE
-.vscode/
 .idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
+.vscode/
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-*.cache
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# Vercel
-.vercel
-
-# OpenNext / Cloudflare
-.open-next/
-
-# Turbo
-.turbo
-
-# UI Reference (not needed in repo)
-ui_reference/
+# App data (local dev)
+*.app
