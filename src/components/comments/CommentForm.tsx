@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,9 @@ export function CommentForm({ episodeId, onCommentAdded }: CommentFormProps) {
   const { user, loading: authLoading } = useAuth();
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +63,7 @@ export function CommentForm({ episodeId, onCommentAdded }: CommentFormProps) {
     }
   };
 
-  if (authLoading) {
+  if (!mounted || authLoading) {
     return <div className="text-muted-foreground">載入中...</div>;
   }
 

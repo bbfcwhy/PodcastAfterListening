@@ -13,7 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Episode, Show } from "@/types/database";
-import { Edit, Trash2, ExternalLink } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  ExternalLink,
+  FileText,
+  Megaphone,
+  Headphones,
+  ScrollText,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -87,6 +95,7 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
           <TableHead className="text-text-primary">節目</TableHead>
           <TableHead className="text-text-primary">發布日期</TableHead>
           <TableHead className="text-text-primary">狀態</TableHead>
+          <TableHead className="text-text-primary">內容</TableHead>
           <TableHead className="text-text-primary">建立時間</TableHead>
           <TableHead className="text-right text-text-primary">操作</TableHead>
         </TableRow>
@@ -94,7 +103,7 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
       <TableBody>
         {episodes.length === 0 ? (
           <TableRow className="border-border-subtle">
-            <TableCell colSpan={6} className="text-center text-text-secondary">
+            <TableCell colSpan={7} className="text-center text-text-secondary">
               尚無節目
             </TableCell>
           </TableRow>
@@ -129,6 +138,34 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
                         ? "下架"
                         : "上架"}
                   </Button>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1.5">
+                  <ContentIcon
+                    icon={FileText}
+                    hasContent={!!episode.ai_summary}
+                    title="內容大綱"
+                    href={`/episodes/edit/${episode.id}?tab=ai_summary`}
+                  />
+                  <ContentIcon
+                    icon={Megaphone}
+                    hasContent={!!episode.ai_sponsorship}
+                    title="業配資訊"
+                    href={`/episodes/edit/${episode.id}?tab=ai_sponsorship`}
+                  />
+                  <ContentIcon
+                    icon={Headphones}
+                    hasContent={!!episode.reflection}
+                    title="站長聽後感"
+                    href={`/episodes/edit/${episode.id}?tab=reflection`}
+                  />
+                  <ContentIcon
+                    icon={ScrollText}
+                    hasContent={!!episode.transcript}
+                    title="逐字稿"
+                    href={`/episodes/edit/${episode.id}?tab=transcript`}
+                  />
                 </div>
               </TableCell>
               <TableCell>
@@ -168,5 +205,29 @@ export function EpisodeTable({ episodes, onDelete }: EpisodeTableProps) {
         )}
       </TableBody>
     </Table>
+  );
+}
+
+function ContentIcon({
+  icon: Icon,
+  hasContent,
+  title,
+  href,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  hasContent: boolean;
+  title: string;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      title={`${title}${hasContent ? "" : "（尚無內容）"}`}
+      className="inline-flex items-center justify-center rounded p-1 transition-colors hover:bg-hover"
+    >
+      <Icon
+        className={`h-4 w-4 ${hasContent ? "text-cta" : "text-text-secondary/30"}`}
+      />
+    </Link>
   );
 }

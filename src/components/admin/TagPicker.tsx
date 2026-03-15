@@ -73,7 +73,7 @@ export function TagPicker({ selectedTagIds, onChange, disabled }: TagPickerProps
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between text-text-secondary font-normal"
+            className="w-full justify-between text-text-secondary font-normal bg-white dark:bg-surface"
             disabled={disabled || loading}
           >
             {loading

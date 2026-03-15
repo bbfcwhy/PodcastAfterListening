@@ -9,16 +9,18 @@ import {
   Library,
   Clock,
   LayoutGrid,
-  Hash
+  Hash,
+  Settings,
 } from "lucide-react";
 
 interface SidebarProps {
   shows: (Show & { episode_count?: number })[];
   tags: Tag[];
+  isAdmin?: boolean;
   className?: string;
 }
 
-export function SidebarContent({ shows, tags }: { shows: (Show & { episode_count?: number })[]; tags: Tag[] }) {
+export function SidebarContent({ shows, tags, isAdmin }: { shows: (Show & { episode_count?: number })[]; tags: Tag[]; isAdmin?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -75,6 +77,22 @@ export function SidebarContent({ shows, tags }: { shows: (Show & { episode_count
                 <span>Library</span>
               </Link>
             </li>
+            {isAdmin && (
+              <li>
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors",
+                    pathname?.startsWith("/dashboard") || pathname?.startsWith("/episodes") || pathname?.startsWith("/shows") && pathname !== "/"
+                      ? "bg-selected text-text-primary"
+                      : "text-text-secondary hover:text-text-primary hover:bg-hover"
+                  )}
+                >
+                  <Settings size={18} />
+                  <span>Admin</span>
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -144,13 +162,13 @@ export function SidebarContent({ shows, tags }: { shows: (Show & { episode_count
   );
 }
 
-export function Sidebar({ shows, tags, className }: SidebarProps) {
+export function Sidebar({ shows, tags, isAdmin, className }: SidebarProps) {
   return (
     <aside className={cn(
       "w-72 bg-surface border-r border-border-subtle h-screen fixed left-0 top-0 overflow-y-auto hidden lg:block",
       className
     )}>
-      <SidebarContent shows={shows} tags={tags} />
+      <SidebarContent shows={shows} tags={tags} isAdmin={isAdmin} />
     </aside>
   );
 }
