@@ -14,10 +14,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Episode, Show } from "@/types/database";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { EPISODE_LONG_TEXT_MAX_LENGTH } from "@/lib/constants";
 import { TagPicker } from "@/components/admin/TagPicker";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 interface EpisodeFormProps {
   episode?: Episode;
@@ -90,7 +96,7 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
           updated_at: episode.updated_at,
         };
 
-        const res = await fetch(`/api/episodes/${episode.id}`, {
+        const res = await fetch(`/api/admin/episodes/${episode.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
@@ -172,7 +178,7 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
       updated_at: null,
     };
     try {
-      const res = await fetch(`/api/episodes/${episode.id}`, {
+      const res = await fetch(`/api/admin/episodes/${episode.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -200,7 +206,7 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
       {showDeletedWarning && (
         <div
           className="rounded-md border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200"
@@ -358,60 +364,11 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="ai_summary">
-          AI 大綱（選填，最多 {EPISODE_LONG_TEXT_MAX_LENGTH.toLocaleString()} 字）
-        </Label>
-        <Textarea
-          id="ai_summary"
-          name="ai_summary"
-          defaultValue={episode?.ai_summary || ""}
-          rows={6}
-          maxLength={EPISODE_LONG_TEXT_MAX_LENGTH}
-          disabled={loading}
-          onChange={markDirty}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="ai_sponsorship">業配內容（選填，支援 Markdown）</Label>
-        <Textarea
-          id="ai_sponsorship"
-          name="ai_sponsorship"
-          defaultValue={episode?.ai_sponsorship || ""}
-          rows={4}
-          disabled={loading}
-          onChange={markDirty}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="transcript">
-          逐字稿（選填，支援 Markdown）
-        </Label>
-        <Textarea
-          id="transcript"
-          name="transcript"
-          defaultValue={episode?.transcript || ""}
-          rows={10}
-          disabled={loading}
-          onChange={markDirty}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="reflection">
-          站長心得（原 Host Notes，支援 Markdown）
-        </Label>
-        <Textarea
-          id="reflection"
-          name="reflection"
-          defaultValue={episode?.reflection || ""}
-          rows={6}
-          disabled={loading}
-          onChange={markDirty}
-        />
-      </div>
+      <ContentTabs
+        episode={episode}
+        loading={loading}
+        markDirty={markDirty}
+      />
 
       <div className="space-y-2">
         <Label>標籤（選填，最多 10 個）</Label>
@@ -466,5 +423,119 @@ export function EpisodeForm({ episode, shows, onSubmit }: EpisodeFormProps) {
         </Button>
       </div>
     </form >
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Content Tabs — 四個長文欄位的 tab 編輯介面
+// ---------------------------------------------------------------------------
+
+const CONTENT_FIELDS = [
+  { key: "ai_summary", label: "內容大綱", rows: 16 },
+  { key: "ai_sponsorship", label: "業配資訊", rows: 12 },
+  { key: "reflection", label: "站長聽後感", rows: 12 },
+  { key: "transcript", label: "逐字稿", rows: 20 },
+] as const;
+
+type ContentFieldKey = (typeof CONTENT_FIELDS)[number]["key"];
+
+function ContentTabs({
+  episode,
+  loading,
+  markDirty,
+}: {
+  episode?: Episode;
+  loading: boolean;
+  markDirty: () => void;
+}) {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const validKeys = CONTENT_FIELDS.map((f) => f.key) as readonly string[];
+  const defaultTab = (tabParam && validKeys.includes(tabParam) ? tabParam : "ai_summary") as ContentFieldKey;
+
+  const [previewing, setPreviewing] = useState<ContentFieldKey | null>(null);
+  const [values, setValues] = useState<Record<ContentFieldKey, string>>(() => ({
+    ai_summary: episode?.ai_summary || "",
+    ai_sponsorship: episode?.ai_sponsorship || "",
+    reflection: episode?.reflection || "",
+    transcript: episode?.transcript || "",
+  }));
+
+  const handleChange = (key: ContentFieldKey, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    markDirty();
+  };
+
+  return (
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList className="w-full justify-start">
+        {CONTENT_FIELDS.map((f) => (
+          <TabsTrigger key={f.key} value={f.key}>
+            {f.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {CONTENT_FIELDS.map((f) => (
+        <TabsContent key={f.key} value={f.key} forceMount className="data-[state=inactive]:hidden">
+          {/* hidden input so FormData always includes the value */}
+          <input type="hidden" name={f.key} value={values[f.key]} />
+
+          <div className="flex items-center justify-between mb-2">
+            <Label>{f.label}</Label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                setPreviewing((cur) => (cur === f.key ? null : f.key))
+              }
+            >
+              {previewing === f.key ? "關閉預覽" : "預覽"}
+            </Button>
+          </div>
+
+          {previewing === f.key ? (
+            <div className="grid grid-cols-2 gap-4">
+              <Textarea
+                value={values[f.key]}
+                rows={f.rows}
+                maxLength={
+                  f.key === "ai_summary"
+                    ? EPISODE_LONG_TEXT_MAX_LENGTH
+                    : undefined
+                }
+                disabled={loading}
+                onChange={(e) => handleChange(f.key, e.target.value)}
+              />
+              <div className="prose prose-sm dark:prose-invert max-w-none overflow-auto rounded-md border border-input bg-white dark:bg-surface p-3 whitespace-pre-wrap">
+                {values[f.key] || (
+                  <span className="text-muted-foreground">（無內容）</span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <Textarea
+              className="bg-white dark:bg-surface"
+              value={values[f.key]}
+              rows={f.rows}
+              maxLength={
+                f.key === "ai_summary"
+                  ? EPISODE_LONG_TEXT_MAX_LENGTH
+                  : undefined
+              }
+              disabled={loading}
+              onChange={(e) => handleChange(f.key, e.target.value)}
+            />
+          )}
+
+          {values[f.key] && (
+            <p className="text-xs text-muted-foreground mt-1 text-right">
+              {values[f.key].length.toLocaleString()} 字
+            </p>
+          )}
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }

@@ -24,7 +24,7 @@ export async function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-canvas text-text-primary">
       {/* Pass data to Client Component */}
-      <Sidebar shows={shows} tags={tags} />
+      <Sidebar shows={shows} tags={tags} isAdmin={profile?.is_admin ?? false} />
 
       <main className="lg:ml-72 min-h-screen flex flex-col">
         <header className="sticky top-0 z-50 glass-header px-4 md:px-10 py-4 md:py-6 flex justify-between items-center gap-4">
@@ -40,7 +40,7 @@ export async function MainLayout({ children }: MainLayoutProps) {
               </SheetTrigger>
               <SheetContent side="left" className="p-0 border-r border-border-subtle bg-surface w-72">
                 <SheetTitle className="sr-only">導覽選單</SheetTitle>
-                <SidebarContent shows={shows} tags={tags} />
+                <SidebarContent shows={shows} tags={tags} isAdmin={profile?.is_admin ?? false} />
               </SheetContent>
             </Sheet>
 

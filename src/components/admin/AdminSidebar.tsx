@@ -32,7 +32,7 @@ export function AdminSidebar() {
     };
 
     return (
-        <aside className="w-full md:w-64 border-r border-border-subtle bg-surface p-4" role="complementary">
+        <aside className="w-full md:w-64 border-r border-border-subtle bg-canvas p-4" role="complementary">
             <div className="space-y-2">
                 <h2 id="admin-nav-heading" className="text-lg font-bold mb-4 text-text-primary">後台管理</h2>
                 <nav className="space-y-1" role="navigation" aria-labelledby="admin-nav-heading">
