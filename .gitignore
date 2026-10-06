@@ -72,3 +72,6 @@ next-env.d.ts
 
 # UI Reference (not needed in repo)
 ui_reference/
+
+# HTML 工作頁（不歸檔）
+tmp/
