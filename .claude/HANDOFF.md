@@ -1,4 +1,4 @@
-# HANDOFF（更新：2026-10-22 22:20）
+# HANDOFF（更新：2026-10-22 22:40）
 
 ## 任務
 
@@ -9,26 +9,34 @@
 - ✅ 已完成：研究與現況盤點，存檔在 `docs/research/2026-10-07-讀者投稿校正與貢獻排行.md`（commit `ccf1ddf`，已 push）。
 - ⏸ 暫緩：功能本身。2026-10-07 威爾決定「先不做，研究存檔」。
 - ✅ 已修並上線：權限漏洞 1 到 4。資料庫（migration 014、015）2026-10-22 套用；程式碼 PR #2、#3、#4 合併，2026-10-22 22:09 部署成功並實測。細節見下方「權限漏洞修補」一節。
+- ⏸ 網站暫時下線（2026-10-22 22:35）：威爾決定等平台與套件的資安問題修好、更新版本後再重新上線。workers.dev 網址與版本預覽網址已關閉（實測回 404、Cloudflare 錯誤碼 1042），GitHub 自動部署已停用。Worker 本身、密鑰、Supabase 資料都保留。
 
 ## 等威爾處理的事
 
 1. ~~恢復 Supabase 專案~~：2026-10-22 查到已恢復（`ACTIVE_HEALTHY`）。
-2. **用管理員身分實際點一次後台**：登入 https://podcastafterlistening.lazzymerlin.workers.dev ，從右上角選單點「Admin Dashboard」（現在會開到 `/dashboard`），再審核或隱藏一則留言。部署後只驗過未登入的情況，管理員流程只在測試裡驗過。
+2. **決定要不要連 Supabase 一起暫停**：網站關了，但資料庫仍可用公開金鑰從網路存取（靠 RLS 與 014、015 的 trigger 保護）。要暫停就到 Supabase 後台操作（之前 INACTIVE 就是暫停狀態）。
 3. **決定「發現 5」要不要修**（見下方）：要改留言發布流程，會影響讀者發留言。
 4. **migration 013 沒有登記在正式庫**：`supabase_migrations.schema_migrations` 只記到 012，然後是這次的 014、015。013 是把節目分類匯入成標籤的資料搬移，要確認當初有沒有手動跑過；別用 `supabase db push` 直接推，它會補跑 013。
 5. **專案根目錄的 `.playwright-mcp/`**（8 個未追蹤檔，2026-10-07 研究工具自動產生）。要嘛你自己刪，要嘛叫我把它加進 `.gitignore`。
 6. **主目錄更新一次**：主目錄的 master 還停在舊版本。跑 `git pull --ff-only` 後再跑 `npm install`（這次新增了 vitest、PGlite、esbuild、vite 等開發依賴），主目錄才能跑 `npm test`。
+7. **重新上線時**（照順序）：
+   1. 更新套件到修好資安問題的版本（next、@opennextjs/cloudflare、wrangler、@supabase/*），注意下方「部署的坑」。
+   2. 跑 `npm test`、`npm run lint`，再用 `git archive` 匯出到 repo 外的乾淨資料夾跑 `npm ci` 和 `npx @opennextjs/cloudflare build`。
+   3. `wrangler.toml` 的 `workers_dev`、`preview_urls` 改回 true，跑 `npx wrangler triggers deploy`。
+   4. 重新啟用自動部署：`gh workflow enable "Deploy to Cloudflare Workers"`，或到 GitHub 的 Actions 頁面啟用。
+   5. 用管理員身分登入，從右上角選單點「Admin Dashboard」，審核或隱藏一則留言。下線前只驗過未登入的情況，管理員流程只在測試裡驗過。
 
 ## 決策紀錄
 
 - 2026-10-07：讀者投稿校正功能先不做，研究存檔。之後要做，從研究文件第 5 節的分階段方案開始，第 6 節的前置條件（權限漏洞、Supabase 恢復）要先處理。
 - 2026-10-13：權限漏洞修補暫停，等威爾有空再開。
+- 2026-10-22 22:35：威爾決定網站暫時下線（「最近資安問題爆太多了」），選擇「關掉網址＋停用自動部署」。重新上線步驟見「等威爾處理的事」第 7 項。
 - 2026-10-22：威爾要求合併 PR #2、#3；合併後部署失敗（找不到 esbuild），威爾同意修正並直接合併 PR #4，部署恢復。
 - 2026-10-22：威爾同意把 014、015 套用到正式庫，採用針對性備份（profiles、comments 全部資料＋規則），備份在主目錄 `tmp/db-backup-20261022-before-014-015/`，同資料夾有 `rollback-014-015.sql`。
 
 ## 下一步
 
-- 權限修補已上線，前置條件只剩「發現 5」要不要修。威爾決定要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
+- 網站暫時下線中。重新上線前，威爾決定「發現 5」要不要修、要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
 - 全部處理完，提醒威爾可以清掉這份 HANDOFF。
 
 ---
