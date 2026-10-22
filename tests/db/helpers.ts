@@ -12,6 +12,7 @@ const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const MIGRATIONS = [
   "001_initial_schema_integrated.sql",
   "002_rls_policies_integrated.sql",
+  "014_guard_profiles_is_admin.sql",
 ];
 
 export const MEMBER_ID = "00000000-0000-0000-0000-00000000000a";
