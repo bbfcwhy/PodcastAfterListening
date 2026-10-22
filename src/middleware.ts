@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAdminPath } from "@/lib/auth/admin-paths";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -12,7 +13,7 @@ export async function middleware(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (isAdminPath(request.nextUrl.pathname)) {
       const url = new URL("/", request.url);
       url.searchParams.set("error", "supabase_not_configured");
       return NextResponse.redirect(url);
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
   );
 
   // Check if accessing admin routes
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  if (isAdminPath(request.nextUrl.pathname)) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
