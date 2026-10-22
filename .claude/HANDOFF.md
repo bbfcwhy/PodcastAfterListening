@@ -1,4 +1,4 @@
-# HANDOFF（更新：2026-10-13 00:50）
+# HANDOFF（更新：2026-10-22 16:00）
 
 ## 任務
 
@@ -8,28 +8,46 @@
 
 - ✅ 已完成：研究與現況盤點，存檔在 `docs/research/2026-10-07-讀者投稿校正與貢獻排行.md`（commit `ccf1ddf`，已 push）。
 - ⏸ 暫緩：功能本身。2026-10-07 威爾決定「先不做，研究存檔」。
-- ⏸ 暫停：修補權限漏洞。2026-10-13 00:41 威爾決定先停，等有空再修。只做完研究，沒改程式碼、沒碰資料庫。細節見下方「權限漏洞修補」一節。
+- ✅ 資料庫已修：權限漏洞 1、2（migration 014、015）2026-10-22 已套用到正式庫並驗證。
+- 🔄 待合併：權限漏洞 3、4（admin 留言 API、middleware）在分支 `fix/permission-holes`，合併進 master 才會部署。細節見下方「權限漏洞修補」一節。
 
 ## 等威爾處理的事
 
-1. **恢復 Supabase 專案**（ref `nkgxkahzhqiasisclvzl`）。2026-10-07 與 2026-10-13 兩次查都是 `INACTIVE`，SQL 查詢連線逾時。正式網站可能讀不到資料。要到 Supabase 後台恢復。
-2. **有空時重開權限修補任務**（見下方一節）。程式碼與測試可以先在本機做；套用到正式資料庫前要等 Supabase 恢復，而且會先給你看 SQL，要你同意。
-3. **決定「發現 5」要不要一起修**（見下方）：要改留言發布流程，會影響讀者發留言。
-4. **專案根目錄的 `.playwright-mcp/`**（8 個未追蹤檔，2026-10-07 研究工具自動產生）。要嘛你自己刪，要嘛叫我把它加進 `.gitignore`。
+1. ~~恢復 Supabase 專案~~：2026-10-22 查到已恢復（`ACTIVE_HEALTHY`）。
+2. **合併 `fix/permission-holes` 的 PR**：合併後 GitHub Actions 會自動部署到 Cloudflare。部署後請登入後台審核一則留言，確認管理員操作正常。
+3. **決定「發現 5」要不要修**（見下方）：要改留言發布流程，會影響讀者發留言。
+4. **migration 013 沒有登記在正式庫**：`supabase_migrations.schema_migrations` 只記到 012，然後是這次的 014、015。013 是把節目分類匯入成標籤的資料搬移，要確認當初有沒有手動跑過；別用 `supabase db push` 直接推，它會補跑 013。
+5. **專案根目錄的 `.playwright-mcp/`**（8 個未追蹤檔，2026-10-07 研究工具自動產生）。要嘛你自己刪，要嘛叫我把它加進 `.gitignore`。
 
 ## 決策紀錄
 
 - 2026-10-07：讀者投稿校正功能先不做，研究存檔。之後要做，從研究文件第 5 節的分階段方案開始，第 6 節的前置條件（權限漏洞、Supabase 恢復）要先處理。
 - 2026-10-13：權限漏洞修補暫停，等威爾有空再開。
+- 2026-10-22：威爾同意把 014、015 套用到正式庫，採用針對性備份（profiles、comments 全部資料＋規則），備份在主目錄 `tmp/db-backup-20261022-before-014-015/`，同資料夾有 `rollback-014-015.sql`。
 
 ## 下一步
 
-- 等第 1、2 項完成後，威爾決定要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
+- 等第 2 項（PR 合併並部署）完成後，威爾決定要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
 - 全部處理完，提醒威爾可以清掉這份 HANDOFF。
 
 ---
 
-## 權限漏洞修補（2026-10-13 暫停，研究結論）
+## 權限漏洞修補（2026-10-22 完成，待合併）
+
+### 完成狀態
+
+| 漏洞 | 修法 | 測試 | 狀態 |
+|---|---|---|---|
+| 1 會員能改自己的 is_admin | migration 014 trigger | `tests/db/profiles-is-admin.test.ts` | ✅ 正式庫已套用 |
+| 2 作者能改自己留言的 status | migration 015 trigger（只准改 content） | `tests/db/comments-moderation.test.ts` | ✅ 正式庫已套用 |
+| 3 admin 留言 API 沒檢查管理員 | 兩支 route 補 401／403 | `tests/unit/admin-comments-api.test.ts` | 🔄 待合併部署 |
+| 4 middleware 擋不到後台 | `src/lib/auth/admin-paths.ts`＋UserMenu 連結 | `tests/unit/admin-route-guard.test.ts` | 🔄 待合併部署 |
+
+- 每個漏洞都先紅後綠，並做 3 到 7 輪突變測試，全部轉紅。`npm test` 共 46 條全過；`next build` 與 OpenNext 建置都成功。
+- 正式庫驗證（唯讀）：兩個 trigger 已啟用、函式本體與 migration 檔逐字相同、資料筆數不變。
+- 測試指令：`npm test`（vitest，資料庫測試用 PGlite，不連正式庫）。
+
+### 以下是 2026-10-13 的研究結論（保留參考）
 
 ### 目標
 
@@ -61,7 +79,7 @@
 ### 測試工具（已決定方向）
 
 - 本機沒有 psql、postgres、supabase CLI；Docker 有裝但沒開。
-- 資料庫測試用 **PGlite**（`@electric-sql/pglite`，在 Node 裡跑的 Postgres）。已實測：`SET ROLE authenticated` 加 RLS 會正確擋別人的資料列；`pg_trgm`、`uuid-ossp` 擴充載得起來。做法：先跑一段 shim（建 auth schema、`auth.uid()` 讀 `request.jwt.claims`、anon／authenticated／service_role 角色、Supabase 預設授權），再跑 `001_initial_schema_integrated.sql` → `002_rls_policies_integrated.sql` → 新 migration。⚠️ 待驗證：001／002 能不能在 PGlite 上直接跑過。
+- 資料庫測試用 **PGlite**（`@electric-sql/pglite`，在 Node 裡跑的 Postgres）。已實測：`SET ROLE authenticated` 加 RLS 會正確擋別人的資料列；`pg_trgm`、`uuid-ossp` 擴充載得起來。做法：先跑一段 shim（建 auth schema、`auth.uid()` 讀 `request.jwt.claims`、anon／authenticated／service_role 角色、Supabase 預設授權），再跑 `001_initial_schema_integrated.sql` → `002_rls_policies_integrated.sql` → 新 migration。2026-10-22 已驗證：001／002 可以直接跑過，shim 只需補 `auth.role()`。
 - App 端（admin API、middleware）用 **vitest**，用 `vi.mock` 模擬 supabase client。
 - 附帶發現：`tests/unit/library-actions.test.ts` 是 Jest 寫法，但專案沒裝 jest，這支測試目前跑不起來。不在本任務範圍。
 
