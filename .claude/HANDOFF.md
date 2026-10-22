@@ -1,4 +1,4 @@
-# HANDOFF（更新：2026-10-22 16:00）
+# HANDOFF（更新：2026-10-22 22:20）
 
 ## 任務
 
@@ -8,31 +8,32 @@
 
 - ✅ 已完成：研究與現況盤點，存檔在 `docs/research/2026-10-07-讀者投稿校正與貢獻排行.md`（commit `ccf1ddf`，已 push）。
 - ⏸ 暫緩：功能本身。2026-10-07 威爾決定「先不做，研究存檔」。
-- ✅ 資料庫已修：權限漏洞 1、2（migration 014、015）2026-10-22 已套用到正式庫並驗證。
-- 🔄 待合併：權限漏洞 3、4（admin 留言 API、middleware）在分支 `fix/permission-holes`，合併進 master 才會部署。細節見下方「權限漏洞修補」一節。
+- ✅ 已修並上線：權限漏洞 1 到 4。資料庫（migration 014、015）2026-10-22 套用；程式碼 PR #2、#3、#4 合併，2026-10-22 22:09 部署成功並實測。細節見下方「權限漏洞修補」一節。
 
 ## 等威爾處理的事
 
 1. ~~恢復 Supabase 專案~~：2026-10-22 查到已恢復（`ACTIVE_HEALTHY`）。
-2. **合併 `fix/permission-holes` 的 PR**：合併後 GitHub Actions 會自動部署到 Cloudflare。部署後請登入後台審核一則留言，確認管理員操作正常。
+2. **用管理員身分實際點一次後台**：登入 https://podcastafterlistening.lazzymerlin.workers.dev ，從右上角選單點「Admin Dashboard」（現在會開到 `/dashboard`），再審核或隱藏一則留言。部署後只驗過未登入的情況，管理員流程只在測試裡驗過。
 3. **決定「發現 5」要不要修**（見下方）：要改留言發布流程，會影響讀者發留言。
 4. **migration 013 沒有登記在正式庫**：`supabase_migrations.schema_migrations` 只記到 012，然後是這次的 014、015。013 是把節目分類匯入成標籤的資料搬移，要確認當初有沒有手動跑過；別用 `supabase db push` 直接推，它會補跑 013。
 5. **專案根目錄的 `.playwright-mcp/`**（8 個未追蹤檔，2026-10-07 研究工具自動產生）。要嘛你自己刪，要嘛叫我把它加進 `.gitignore`。
+6. **主目錄更新一次**：主目錄的 master 還停在舊版本。跑 `git pull --ff-only` 後再跑 `npm install`（這次新增了 vitest、PGlite、esbuild、vite 等開發依賴），主目錄才能跑 `npm test`。
 
 ## 決策紀錄
 
 - 2026-10-07：讀者投稿校正功能先不做，研究存檔。之後要做，從研究文件第 5 節的分階段方案開始，第 6 節的前置條件（權限漏洞、Supabase 恢復）要先處理。
 - 2026-10-13：權限漏洞修補暫停，等威爾有空再開。
+- 2026-10-22：威爾要求合併 PR #2、#3；合併後部署失敗（找不到 esbuild），威爾同意修正並直接合併 PR #4，部署恢復。
 - 2026-10-22：威爾同意把 014、015 套用到正式庫，採用針對性備份（profiles、comments 全部資料＋規則），備份在主目錄 `tmp/db-backup-20261022-before-014-015/`，同資料夾有 `rollback-014-015.sql`。
 
 ## 下一步
 
-- 等第 2 項（PR 合併並部署）完成後，威爾決定要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
+- 權限修補已上線，前置條件只剩「發現 5」要不要修。威爾決定要不要啟動投稿校正的第 1 階段。啟動時用 `/speckit.specify` 寫規格。
 - 全部處理完，提醒威爾可以清掉這份 HANDOFF。
 
 ---
 
-## 權限漏洞修補（2026-10-22 完成，待合併）
+## 權限漏洞修補（2026-10-22 完成並上線）
 
 ### 完成狀態
 
@@ -40,12 +41,18 @@
 |---|---|---|---|
 | 1 會員能改自己的 is_admin | migration 014 trigger | `tests/db/profiles-is-admin.test.ts` | ✅ 正式庫已套用 |
 | 2 作者能改自己留言的 status | migration 015 trigger（只准改 content） | `tests/db/comments-moderation.test.ts` | ✅ 正式庫已套用 |
-| 3 admin 留言 API 沒檢查管理員 | 兩支 route 補 401／403 | `tests/unit/admin-comments-api.test.ts` | 🔄 待合併部署 |
-| 4 middleware 擋不到後台 | `src/lib/auth/admin-paths.ts`＋UserMenu 連結 | `tests/unit/admin-route-guard.test.ts` | 🔄 待合併部署 |
+| 3 admin 留言 API 沒檢查管理員 | 兩支 route 補 401／403 | `tests/unit/admin-comments-api.test.ts` | ✅ 已部署 |
+| 4 middleware 擋不到後台 | `src/lib/auth/admin-paths.ts`＋UserMenu 連結 | `tests/unit/admin-route-guard.test.ts` | ✅ 已部署 |
 
 - 每個漏洞都先紅後綠，並做 3 到 7 輪突變測試，全部轉紅。`npm test` 共 46 條全過；`next build` 與 OpenNext 建置都成功。
 - 正式庫驗證（唯讀）：兩個 trigger 已啟用、函式本體與 migration 檔逐字相同、資料筆數不變。
 - 測試指令：`npm test`（vitest，資料庫測試用 PGlite，不連正式庫）。
+- 正式網站實測（2026-10-22 部署後，未登入）：8 個後台網址都 307 導回首頁；兩支 admin 留言 API 都回 401；前台首頁、搜尋、最新都是 200。
+
+### 部署的坑（升級 vitest 或 vite 前必讀）
+
+- `@opennextjs/cloudflare` 會 import `esbuild` 卻沒宣告依賴，靠最上層的 esbuild 0.25.4（`@opennextjs/aws` 指定的版本）。所以 package.json 明確寫了 `esbuild: 0.25.4` 和 `vite: ^6.4.5`。vite 8 要求 esbuild 0.27 以上，會把 0.25.4 擠出最上層，部署就會失敗（PR #4）。
+- 在 worktree 裡驗證建置會失真：worktree 放在主目錄的 `.claude/worktrees/` 底下，Node 找不到套件時會往上找到主目錄的 `node_modules`。要驗部署，就用 `git archive HEAD | tar -x -C <repo 外的資料夾>`，在那裡跑 `npm ci` 和 `npx @opennextjs/cloudflare build`。
 
 ### 以下是 2026-10-13 的研究結論（保留參考）
 
