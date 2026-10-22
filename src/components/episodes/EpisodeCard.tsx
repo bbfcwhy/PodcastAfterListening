@@ -5,7 +5,7 @@ import { ChevronRight, Podcast, Play } from "lucide-react";
 
 interface EpisodeCardProps {
   episode: Episode & { formattedPublishedDate?: string | null };
-  show?: Show;
+  show?: Pick<Show, "name" | "slug" | "cover_image_url">;
 }
 
 export function EpisodeCard({ episode, show }: EpisodeCardProps) {
