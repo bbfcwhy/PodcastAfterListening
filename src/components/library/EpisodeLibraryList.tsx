@@ -34,7 +34,7 @@ export function EpisodeLibraryList({ items }: EpisodeLibraryListProps) {
                     <EpisodeCard
                         key={item.id}
                         episode={{ ...item.episode, formattedPublishedDate }}
-                        show={item.episode.show as any}
+                        show={item.episode.show}
                     />
                 );
             })}
